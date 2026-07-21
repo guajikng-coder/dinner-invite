@@ -867,6 +867,189 @@
       border: 1px dashed var(--rose-light);
     }
 
+    /* ===== Fun Quiz ===== */
+    .quiz-container {
+      width: 100%;
+      min-height: 120px;
+    }
+
+    .quiz-question {
+      font-size: 14px;
+      color: var(--ink);
+      font-weight: 600;
+      margin-bottom: 12px;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .quiz-option {
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.6);
+      border: 2px solid var(--rose-light);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: left;
+      font-size: 13px;
+      color: var(--ink);
+    }
+
+    .quiz-option:hover {
+      border-color: var(--rose);
+      background: rgba(199,107,138,0.05);
+    }
+
+    .quiz-option.selected {
+      border-color: var(--rose-deep);
+      background: rgba(139,34,82,0.08);
+    }
+
+    .quiz-option.correct {
+      border-color: #4CAF50;
+      background: rgba(76,175,80,0.1);
+    }
+
+    .quiz-option.wrong {
+      border-color: #f44336;
+      background: rgba(244,67,54,0.1);
+    }
+
+    .quiz-progress {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .quiz-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--rose-light);
+    }
+
+    .quiz-dot.active {
+      background: var(--rose-deep);
+    }
+
+    .quiz-dot.done {
+      background: #4CAF50;
+    }
+
+    .quiz-result {
+      text-align: center;
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(199,107,138,0.08) 0%, rgba(201,169,110,0.08) 100%);
+      border-radius: 12px;
+      margin-top: 10px;
+    }
+
+    .quiz-score {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--rose-deep);
+    }
+
+    .quiz-score-text {
+      font-size: 14px;
+      color: var(--ink);
+      margin-top: 4px;
+    }
+
+    /* ===== Time Scroll ===== */
+    .scroll-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .scroll-btn {
+      flex: 1;
+      padding: 6px 10px;
+      background: rgba(255,255,255,0.6);
+      border: 1px solid var(--rose-light);
+      border-radius: 8px;
+      font-size: 11px;
+      color: var(--ink);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .scroll-btn:hover {
+      background: rgba(199,107,138,0.1);
+      border-color: var(--rose);
+    }
+
+    .scroll-btn.playing {
+      background: var(--rose-deep);
+      color: white;
+      border-color: var(--rose-deep);
+    }
+
+    .time-scroll-container {
+      width: 100%;
+      height: 280px;
+      overflow: hidden;
+      position: relative;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.3);
+    }
+
+    .time-scroll-content {
+      position: absolute;
+      width: 100%;
+      transition: transform 0.5s ease;
+    }
+
+    .scroll-item {
+      padding: 10px 12px;
+      margin: 6px 8px;
+      background: rgba(255,255,255,0.7);
+      border-radius: 10px;
+      border-left: 3px solid var(--rose);
+      text-align: left;
+    }
+
+    .scroll-item.photo {
+      border-left-color: var(--gold);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .scroll-item.photo img {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .scroll-item.audio {
+      border-left-color: #E91E63;
+    }
+
+    .scroll-item.note {
+      border-left-color: var(--gold);
+    }
+
+    .scroll-item-time {
+      font-size: 10px;
+      color: var(--ink-soft);
+      margin-bottom: 2px;
+    }
+
+    .scroll-item-text {
+      font-size: 12px;
+      color: var(--ink);
+      line-height: 1.4;
+    }
+
     /* ===== Form ===== */
     .form-group { width: 100%; margin-bottom: 10px; text-align: left; }
     .form-label { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--rose); margin-bottom: 4px; display: block; }
@@ -1464,8 +1647,37 @@
         </div>
       </div>
 
-      <!-- Page 9: End -->
+      <!-- Page 9: Fun Quiz -->
       <div class="page" data-page="8">
+        <div class="page-eyebrow">🎭 趣味问答</div>
+        <p style="font-size:11px; color:var(--ink-soft); margin-bottom:8px;">测测你有多了解我们？</p>
+        
+        <div class="quiz-container" id="quizContainer"></div>
+        
+        <div class="quiz-progress" id="quizProgress"></div>
+        
+        <div class="quiz-result" id="quizResult" style="display:none;"></div>
+        
+        <button class="btn" style="width:100%; margin-top:8px;" onclick="startQuiz()">开始答题 🎯</button>
+      </div>
+
+      <!-- Page 10: Time Scroll -->
+      <div class="page" data-page="9">
+        <div class="page-eyebrow">📜 时光卷轴</div>
+        <p style="font-size:11px; color:var(--ink-soft); margin-bottom:6px;">回忆如潮水般涌来</p>
+        
+        <div class="scroll-controls">
+          <button class="scroll-btn" id="scrollPlayBtn" onclick="toggleTimeScroll()">▶ 播放</button>
+          <button class="scroll-btn" onclick="resetTimeScroll()">↺ 重置</button>
+        </div>
+        
+        <div class="time-scroll-container" id="timeScrollContainer">
+          <div class="time-scroll-content" id="timeScrollContent"></div>
+        </div>
+      </div>
+
+      <!-- Page 11: End -->
+      <div class="page" data-page="10">
         <div style="font-size:48px; margin-bottom:12px;">💝</div>
         <h1>友谊长存</h1>
         <div class="page-divider"></div>
@@ -1498,7 +1710,7 @@
 <script>
 // ===== Flipbook =====
 let currentPage = 0;
-const totalPages = 9;
+const totalPages = 11;
 const pages = document.querySelectorAll('.page');
 const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
@@ -2233,11 +2445,223 @@ setInterval(createFloatingHeart, 4000);
 // ===== Utils =====
 function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
+// ===== Fun Quiz =====
+const quizQuestions = [
+  {
+    q: '我们第一次见面是什么时候？',
+    options: ['小学', '初中', '高中', '大学'],
+    answer: 2
+  },
+  {
+    q: '我们一起去过的最远的地方是？',
+    options: ['北京', '上海', '三亚', '成都'],
+    answer: 2
+  },
+  {
+    q: '谁更爱迟到？',
+    options: ['我', '她', '都爱', '都不迟到'],
+    answer: 2
+  },
+  {
+    q: '我们最常一起做的事是？',
+    options: ['看电影', '吃饭', '逛街', '打游戏'],
+    answer: 1
+  },
+  {
+    q: '我们的友谊始于哪一年？',
+    options: ['2018', '2019', '2020', '2021'],
+    answer: 2
+  }
+];
+
+let quizCurrent = 0;
+let quizScore = 0;
+let quizAnswered = false;
+
+function startQuiz() {
+  quizCurrent = 0;
+  quizScore = 0;
+  document.getElementById('quizResult').style.display = 'none';
+  renderQuiz();
+}
+
+function renderQuiz() {
+  const container = document.getElementById('quizContainer');
+  const progress = document.getElementById('quizProgress');
+  
+  if (quizCurrent >= quizQuestions.length) {
+    showQuizResult();
+    return;
+  }
+  
+  const q = quizQuestions[quizCurrent];
+  quizAnswered = false;
+  
+  container.innerHTML = `
+    <div class="quiz-question">${quizCurrent + 1}. ${q.q}</div>
+    <div class="quiz-options">
+      ${q.options.map((opt, i) => `
+        <div class="quiz-option" onclick="answerQuiz(${i})">${opt}</div>
+      `).join('')}
+    </div>
+  `;
+  
+  progress.innerHTML = quizQuestions.map((_, i) => `
+    <div class="quiz-dot ${i === quizCurrent ? 'active' : ''} ${i < quizCurrent ? 'done' : ''}"></div>
+  `).join('');
+}
+
+function answerQuiz(index) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  
+  const q = quizQuestions[quizCurrent];
+  const options = document.querySelectorAll('.quiz-option');
+  
+  options.forEach((opt, i) => {
+    if (i === q.answer) opt.classList.add('correct');
+    if (i === index && i !== q.answer) opt.classList.add('wrong');
+    opt.style.pointerEvents = 'none';
+  });
+  
+  if (index === q.answer) quizScore++;
+  
+  setTimeout(() => {
+    quizCurrent++;
+    renderQuiz();
+  }, 1000);
+}
+
+function showQuizResult() {
+  const container = document.getElementById('quizContainer');
+  const result = document.getElementById('quizResult');
+  const progress = document.getElementById('quizProgress');
+  
+  container.innerHTML = '';
+  progress.innerHTML = '';
+  
+  const percent = Math.round((quizScore / quizQuestions.length) * 100);
+  let text = '';
+  if (percent === 100) text = '满分！你是最了解我们的人！';
+  else if (percent >= 80) text = '很棒！你很了解我们的故事！';
+  else if (percent >= 60) text = '还不错，继续加油！';
+  else text = '看来你还需要多了解一下我们～';
+  
+  result.style.display = 'block';
+  result.innerHTML = `
+    <div class="quiz-score">${quizScore}/${quizQuestions.length}</div>
+    <div class="quiz-score-text">${text}</div>
+  `;
+  
+  fireConfetti();
+}
+
+// ===== Time Scroll =====
+let timeScrollPlaying = false;
+let timeScrollTimer = null;
+let timeScrollIndex = 0;
+
+function renderTimeScroll() {
+  const db = loadDB();
+  const content = document.getElementById('timeScrollContent');
+  const items = [];
+  
+  // 收集所有内容
+  (db.archive || []).forEach(item => {
+    items.push({
+      type: item.type,
+      text: item.type === 'photo' ? '📷 一张照片' : item.type === 'audio' ? '🎤 一段录音' : item.text,
+      time: item.time,
+      data: item.data
+    });
+  });
+  
+  (db.wishes || []).forEach(item => {
+    items.push({
+      type: 'wish',
+      text: `${item.name}: ${item.text}`,
+      time: item.time
+    });
+  });
+  
+  // 按时间排序
+  items.sort((a, b) => new Date(b.time) - new Date(a.time));
+  
+  if (!items.length) {
+    content.innerHTML = '<div style="text-align:center; color:var(--ink-soft); font-size:12px; padding:40px 0;">还没有回忆，快去添加吧！</div>';
+    return;
+  }
+  
+  content.innerHTML = items.map(item => {
+    let icon = '📝';
+    let extra = '';
+    if (item.type === 'photo') {
+      icon = '📷';
+      extra = item.data ? `<img src="${item.data}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;margin-top:4px;">` : '';
+    } else if (item.type === 'audio') icon = '🎤';
+    else if (item.type === 'wish') icon = '💌';
+    
+    return `
+      <div class="scroll-item ${item.type}">
+        <div class="scroll-item-time">${item.time || ''}</div>
+        <div class="scroll-item-text">${icon} ${esc(item.text)}</div>
+        ${extra}
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleTimeScroll() {
+  const btn = document.getElementById('scrollPlayBtn');
+  
+  if (timeScrollPlaying) {
+    timeScrollPlaying = false;
+    clearInterval(timeScrollTimer);
+    btn.textContent = '▶ 播放';
+    btn.classList.remove('playing');
+  } else {
+    timeScrollPlaying = true;
+    btn.textContent = '⏸ 暂停';
+    btn.classList.add('playing');
+    
+    const container = document.getElementById('timeScrollContainer');
+    const content = document.getElementById('timeScrollContent');
+    const containerHeight = container.offsetHeight;
+    const contentHeight = content.scrollHeight;
+    
+    if (contentHeight <= containerHeight) {
+      showToast('内容较少，无需滚动');
+      return;
+    }
+    
+    let pos = 0;
+    timeScrollTimer = setInterval(() => {
+      pos += 1;
+      if (pos >= contentHeight - containerHeight) {
+        pos = 0;
+      }
+      content.style.transform = `translateY(-${pos}px)`;
+    }, 50);
+  }
+}
+
+function resetTimeScroll() {
+  timeScrollPlaying = false;
+  clearInterval(timeScrollTimer);
+  const btn = document.getElementById('scrollPlayBtn');
+  btn.textContent = '▶ 播放';
+  btn.classList.remove('playing');
+  
+  const content = document.getElementById('timeScrollContent');
+  content.style.transform = 'translateY(0)';
+}
+
 // ===== Init =====
 renderWishes();
 renderCapsules();
 renderSongs();
 renderArchive();
+renderTimeScroll();
 createCherryBlossom();
 </script>
 </body>
