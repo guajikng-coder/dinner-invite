@@ -898,6 +898,90 @@
       overflow: hidden;
       background: rgba(0,0,0,0.05);
     }
+
+    /* ===== Music search ===== */
+    .music-search {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .music-search-input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid var(--rose-light);
+      border-radius: 20px;
+      font-size: 13px;
+      background: rgba(255,255,255,0.6);
+      color: var(--ink);
+      outline: none;
+      font-family: inherit;
+    }
+    .music-search-input:focus {
+      border-color: var(--gold);
+    }
+    .music-search-btn {
+      width: 38px;
+      height: 38px;
+      border: none;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--rose-deep), var(--rose));
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .music-search-btn:hover {
+      transform: scale(1.05);
+    }
+    .music-search-results {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .music-search-results.show {
+      display: block;
+    }
+    .search-result-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-size: 13px;
+      color: var(--ink);
+    }
+    .search-result-item:hover {
+      background: rgba(139,34,82,0.08);
+    }
+    .search-result-item .result-icon {
+      font-size: 16px;
+    }
+    .search-result-item .result-info {
+      flex: 1;
+      overflow: hidden;
+    }
+    .search-result-item .result-name {
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .search-result-item .result-artist {
+      font-size: 11px;
+      color: var(--ink-soft);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .search-loading {
+      text-align: center;
+      padding: 20px;
+      color: var(--ink-soft);
+      font-size: 13px;
+    }
     .music-playlist-item {
       display: flex;
       align-items: center;
@@ -960,7 +1044,19 @@
   <div class="music-player">
     <div class="music-panel" id="musicPanel">
       <div class="music-title">🎵 在线音乐</div>
+      
+      <!-- Search -->
+      <div class="music-search">
+        <input class="music-search-input" id="musicSearchInput" placeholder="搜索歌曲..." 
+          onkeydown="if(event.key==='Enter')searchMusic()">
+        <button class="music-search-btn" onclick="searchMusic()">🔍</button>
+      </div>
+      <div class="music-search-results" id="searchResults"></div>
+      
+      <!-- Playlist -->
       <div class="music-playlist" id="musicPlaylist"></div>
+      
+      <!-- Player -->
       <div class="netease-player">
         <iframe id="musicFrame"
           src="https://music.163.com/outchain/player?type=2&id=1901371647&auto=0&height=66"
@@ -1519,6 +1615,69 @@ function renderMusicPlaylist() {
       <span class="item-name">${song.name}</span>
     </div>`;
   }).join('');
+}
+
+// ===== Music Search =====
+let searchDebounce = null;
+
+async function searchMusic() {
+  const input = document.getElementById('musicSearchInput');
+  const query = input.value.trim();
+  if (!query) return;
+  
+  const resultsDiv = document.getElementById('searchResults');
+  resultsDiv.classList.add('show');
+  resultsDiv.innerHTML = '<div class="search-loading">搜索中...</div>';
+  
+  try {
+    // 使用多个公共 API 源
+    const apis = [
+      `https://api.lolimi.cn/API/wydg/?msg=${encodeURIComponent(query)}`,
+      `https://api.vvhan.com/api/wydg?msg=${encodeURIComponent(query)}`,
+    ];
+    
+    let data = null;
+    for (const api of apis) {
+      try {
+        const res = await fetch(api);
+        data = await res.json();
+        if (data && data.data && data.data.length > 0) break;
+      } catch (e) { continue; }
+    }
+    
+    if (!data || !data.data || data.data.length === 0) {
+      resultsDiv.innerHTML = '<div class="search-loading">未找到相关歌曲</div>';
+      return;
+    }
+    
+    resultsDiv.innerHTML = data.data.slice(0, 8).map((song, i) => {
+      return `<div class="search-result-item" onclick="playSearchResult('${song.id}', '${song.name.replace(/'/g, "\\'")} - ${song.artists.replace(/'/g, "\\'")}')">
+        <span class="result-icon">🎵</span>
+        <div class="result-info">
+          <div class="result-name">${song.name}</div>
+          <div class="result-artist">${song.artists}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch (err) {
+    resultsDiv.innerHTML = '<div class="search-loading">搜索失败，请重试</div>';
+  }
+}
+
+function playSearchResult(id, name) {
+  musicFrame.src = `https://music.163.com/outchain/player?type=2&id=${id}&auto=1&height=66`;
+  showToast('正在播放: ' + name);
+  
+  // 添加到播放列表
+  if (!songList.find(s => s.id == id)) {
+    songList.unshift({ id: parseInt(id), name: name, icon: '🎵' });
+    currentTrackIdx = 0;
+    renderMusicPlaylist();
+  }
+  
+  // 清空搜索结果
+  document.getElementById('searchResults').classList.remove('show');
+  document.getElementById('musicSearchInput').value = '';
 }
 
 renderMusicPlaylist();
