@@ -859,9 +859,6 @@
   <div class="toast" id="toast"></div>
 
   <!-- Music Player -->
-  <audio id="bgMusic" loop preload="auto">
-    <source src="https://cdn.jsdelivr.net/gh/nicehash/Awesome-Music@main/BGM/sweet-memories.mp3" type="audio/mpeg">
-  </audio>
   <div class="music-player">
     <div class="music-panel" id="musicPanel">
       <div class="music-title">🎵 正在播放</div>
@@ -873,7 +870,7 @@
         <button class="music-btn play-btn" id="playBtn" onclick="togglePlay()">▶</button>
         <button class="music-btn" onclick="nextTrack()">⏭</button>
       </div>
-      <div class="music-info" id="musicInfo">甜蜜的回忆 - 轻音乐</div>
+      <div class="music-info" id="musicInfo">星空下的旋律</div>
       <div class="music-visualizer paused" id="visualizer">
         <div class="music-bar"></div>
         <div class="music-bar"></div>
@@ -1397,8 +1394,7 @@ submitRSVP = function() {
   fireConfetti();
 };
 
-// ===== Music Player =====
-const bgMusic = document.getElementById('bgMusic');
+// ===== Music Player (Web Audio API) =====
 const playBtn = document.getElementById('playBtn');
 const musicPanel = document.getElementById('musicPanel');
 const musicToggle = document.getElementById('musicToggle');
@@ -1406,25 +1402,118 @@ const visualizer = document.getElementById('visualizer');
 const musicProgressFill = document.getElementById('musicProgressFill');
 const musicInfo = document.getElementById('musicInfo');
 
-const playlist = [
-  { name: '甜蜜的回忆 - 轻音乐', url: 'https://cdn.jsdelivr.net/gh/nicehash/Awesome-Music@main/BGM/sweet-memories.mp3' },
-  { name: '月光小夜曲 - 钢琴曲', url: 'https://cdn.jsdelivr.net/gh/nicehash/Awesome-Music@main/BGM/moonlight-sonata.mp3' },
-  { name: '午后的阳光 - 吉他曲', url: 'https://cdn.jsdelivr.net/gh/nicehash/Awesome-Music@main/BGM/afternoon-sunshine.mp3' },
-];
-let currentTrack = 0;
+let audioCtx = null;
 let isPlaying = false;
+let currentMelody = 0;
+let melodyTimeout = null;
+let melodyStartTime = 0;
+let melodyDuration = 0;
 
-function loadTrack(idx) {
-  currentTrack = idx % playlist.length;
-  bgMusic.src = playlist[currentTrack].url;
-  musicInfo.textContent = playlist[currentTrack].name;
+const melodies = [
+  {
+    name: '星空下的旋律',
+    notes: [
+      { freq: 523.25, dur: 0.4 }, { freq: 587.33, dur: 0.4 }, { freq: 659.25, dur: 0.4 },
+      { freq: 698.46, dur: 0.6 }, { freq: 659.25, dur: 0.2 }, { freq: 587.33, dur: 0.4 },
+      { freq: 523.25, dur: 0.4 }, { freq: 440.00, dur: 0.4 }, { freq: 493.88, dur: 0.4 },
+      { freq: 523.25, dur: 0.8 }, { freq: 0, dur: 0.4 },
+      { freq: 392.00, dur: 0.4 }, { freq: 440.00, dur: 0.4 }, { freq: 493.88, dur: 0.4 },
+      { freq: 523.25, dur: 0.6 }, { freq: 493.88, dur: 0.2 }, { freq: 440.00, dur: 0.4 },
+      { freq: 392.00, dur: 0.4 }, { freq: 349.23, dur: 0.4 }, { freq: 392.00, dur: 0.4 },
+      { freq: 440.00, dur: 0.8 }, { freq: 0, dur: 0.4 },
+    ]
+  },
+  {
+    name: '午后的微风',
+    notes: [
+      { freq: 440.00, dur: 0.3 }, { freq: 493.88, dur: 0.3 }, { freq: 523.25, dur: 0.3 },
+      { freq: 587.33, dur: 0.5 }, { freq: 523.25, dur: 0.5 },
+      { freq: 493.88, dur: 0.3 }, { freq: 440.00, dur: 0.3 }, { freq: 392.00, dur: 0.3 },
+      { freq: 440.00, dur: 0.8 }, { freq: 0, dur: 0.4 },
+      { freq: 523.25, dur: 0.3 }, { freq: 587.33, dur: 0.3 }, { freq: 659.25, dur: 0.3 },
+      { freq: 698.46, dur: 0.5 }, { freq: 659.25, dur: 0.5 },
+      { freq: 587.33, dur: 0.3 }, { freq: 523.25, dur: 0.3 }, { freq: 493.88, dur: 0.3 },
+      { freq: 523.25, dur: 0.8 }, { freq: 0, dur: 0.4 },
+    ]
+  },
+  {
+    name: '月光小夜曲',
+    notes: [
+      { freq: 329.63, dur: 0.5 }, { freq: 392.00, dur: 0.5 }, { freq: 493.88, dur: 0.5 },
+      { freq: 523.25, dur: 0.7 }, { freq: 493.88, dur: 0.3 },
+      { freq: 392.00, dur: 0.5 }, { freq: 329.63, dur: 0.5 }, { freq: 293.66, dur: 0.5 },
+      { freq: 329.63, dur: 1.0 }, { freq: 0, dur: 0.5 },
+      { freq: 261.63, dur: 0.5 }, { freq: 329.63, dur: 0.5 }, { freq: 392.00, dur: 0.5 },
+      { freq: 440.00, dur: 0.7 }, { freq: 392.00, dur: 0.3 },
+      { freq: 329.63, dur: 0.5 }, { freq: 261.63, dur: 0.5 }, { freq: 220.00, dur: 0.5 },
+      { freq: 261.63, dur: 1.0 }, { freq: 0, dur: 0.5 },
+    ]
+  }
+];
+
+function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+}
+
+function playNote(freq, startTime, duration, volume = 0.15) {
+  if (freq === 0) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(freq, startTime);
+  gain.gain.setValueAtTime(0, startTime);
+  gain.gain.linearRampToValueAtTime(volume, startTime + 0.05);
+  gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration - 0.05);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start(startTime);
+  osc.stop(startTime + duration);
+}
+
+function playMelody() {
+  initAudio();
+  const melody = melodies[currentMelody];
+  let time = audioCtx.currentTime;
+  melodyStartTime = time;
+  melodyDuration = melody.notes.reduce((sum, n) => sum + n.dur, 0);
+  
+  melody.notes.forEach(note => {
+    playNote(note.freq, time, note.dur);
+    time += note.dur;
+  });
+  
+  melodyTimeout = setTimeout(() => {
+    if (isPlaying) {
+      playMelody();
+    }
+  }, melodyDuration * 1000);
+}
+
+function stopMelody() {
+  if (melodyTimeout) {
+    clearTimeout(melodyTimeout);
+    melodyTimeout = null;
+  }
 }
 
 function togglePlay() {
   if (isPlaying) {
-    bgMusic.pause();
+    isPlaying = false;
+    stopMelody();
+    playBtn.textContent = '▶';
+    musicToggle.classList.remove('playing');
+    visualizer.classList.add('paused');
   } else {
-    bgMusic.play().catch(() => {});
+    isPlaying = true;
+    playMelody();
+    playBtn.textContent = '⏸';
+    musicToggle.classList.add('playing');
+    visualizer.classList.remove('paused');
   }
 }
 
@@ -1433,48 +1522,36 @@ function toggleMusicPanel() {
 }
 
 function prevTrack() {
-  loadTrack(currentTrack - 1);
-  if (isPlaying) bgMusic.play().catch(() => {});
+  stopMelody();
+  currentMelody = (currentMelody - 1 + melodies.length) % melodies.length;
+  musicInfo.textContent = melodies[currentMelody].name;
+  if (isPlaying) playMelody();
 }
 
 function nextTrack() {
-  loadTrack(currentTrack + 1);
-  if (isPlaying) bgMusic.play().catch(() => {});
+  stopMelody();
+  currentMelody = (currentMelody + 1) % melodies.length;
+  musicInfo.textContent = melodies[currentMelody].name;
+  if (isPlaying) playMelody();
 }
 
 function seekMusic(e) {
+  // Visual feedback only for generated audio
   const rect = e.target.getBoundingClientRect();
   const pct = (e.clientX - rect.left) / rect.width;
-  bgMusic.currentTime = bgMusic.duration * pct;
+  musicProgressFill.style.width = (pct * 100) + '%';
 }
 
-bgMusic.addEventListener('play', () => {
-  isPlaying = true;
-  playBtn.textContent = '⏸';
-  musicToggle.classList.add('playing');
-  visualizer.classList.remove('paused');
-});
-
-bgMusic.addEventListener('pause', () => {
-  isPlaying = false;
-  playBtn.textContent = '▶';
-  musicToggle.classList.remove('playing');
-  visualizer.classList.add('paused');
-});
-
-bgMusic.addEventListener('timeupdate', () => {
-  if (bgMusic.duration) {
-    musicProgressFill.style.width = (bgMusic.currentTime / bgMusic.duration * 100) + '%';
+// Progress animation
+setInterval(() => {
+  if (isPlaying && melodyDuration > 0) {
+    const elapsed = (Date.now() / 1000) - melodyStartTime;
+    const progress = (elapsed % melodyDuration) / melodyDuration;
+    musicProgressFill.style.width = (progress * 100) + '%';
   }
-});
+}, 100);
 
-bgMusic.addEventListener('ended', () => {
-  nextTrack();
-  bgMusic.play().catch(() => {});
-});
-
-// Load first track
-loadTrack(0);
+musicInfo.textContent = melodies[0].name;
 </script>
 </body>
 </html>
