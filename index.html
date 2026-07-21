@@ -2387,13 +2387,13 @@ function showToast(msg) {
 
 // ===== Data Store with API Support =====
 const DB_KEY = 'farewell_memories';
-const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api';
+const API_BASE = 'http://43.142.255.196:3000/api';
 let useAPI = false;
 
 // Check if backend is available
 async function checkAPI() {
   try {
-    const res = await fetch(API_BASE + '/health', { signal: AbortSignal.timeout(3000) });
+    const res = await fetch(API_BASE + '/health', { signal: AbortSignal.timeout(5000) });
     if (res.ok) {
       useAPI = true;
       console.log('✅ 已连接后端服务器');
@@ -2685,21 +2685,24 @@ function createCapsule() {
   const open = new Date(openDate);
   if (open <= now) { showToast('开放日期必须在未来'); return; }
   
-  const db = loadDB();
-  if (!db.capsules) db.capsules = [];
-  db.capsules.push({
-    name,
-    text,
-    createDate: now.toLocaleDateString('zh-CN'),
-    openDate: openDate
-  });
-  saveDB(db);
+  if (useAPI) {
+    apiPost('/capsules', { name, text, open_date: openDate }).then(() => renderCapsules());
+  } else {
+    const db = loadDB();
+    if (!db.capsules) db.capsules = [];
+    db.capsules.push({
+      name,
+      text,
+      createDate: now.toLocaleDateString('zh-CN'),
+      openDate: openDate
+    });
+    saveDB(db);
+    renderCapsules();
+  }
   
   document.getElementById('capsuleName').value = '';
   document.getElementById('capsuleContent').value = '';
   document.getElementById('capsuleDate').value = '';
-  
-  renderCapsules();
   showToast('时间胶囊已封存！📦');
   fireConfetti();
 }
@@ -2707,6 +2710,10 @@ function createCapsule() {
 function deleteCapsule(index) {
   if (!confirm('确定要删除这个时间胶囊吗？')) return;
   const db = loadDB();
+  const capsule = db.capsules[index];
+  if (useAPI && capsule && capsule.id) {
+    apiDelete('/capsules/' + capsule.id);
+  }
   db.capsules.splice(index, 1);
   saveDB(db);
   renderCapsules();
@@ -2743,22 +2750,29 @@ function addSong() {
   
   if (!name || !artist) { showToast('请填写歌曲名和歌手'); return; }
   
-  const db = loadDB();
-  if (!db.songs) db.songs = [];
-  db.songs.push({ name, artist, link });
-  saveDB(db);
+  if (useAPI) {
+    apiPost('/songs', { name, artist, link }).then(() => renderSongs());
+  } else {
+    const db = loadDB();
+    if (!db.songs) db.songs = [];
+    db.songs.push({ name, artist, link });
+    saveDB(db);
+    renderSongs();
+  }
   
   document.getElementById('songName').value = '';
   document.getElementById('songArtist').value = '';
   document.getElementById('songLink').value = '';
-  
-  renderSongs();
   showToast('歌曲已添加！🎶');
 }
 
 function deleteSong(index) {
   if (!confirm('确定要删除这首歌吗？')) return;
   const db = loadDB();
+  const song = db.songs[index];
+  if (useAPI && song && song.id) {
+    apiDelete('/songs/' + song.id);
+  }
   db.songs.splice(index, 1);
   saveDB(db);
   renderSongs();
@@ -2795,9 +2809,6 @@ function handlePhotoUpload(event) {
   const files = event.target.files;
   if (!files.length) return;
   
-  const db = loadDB();
-  if (!db.archive) db.archive = [];
-  
   const category = currentFolder === 'all' || currentFolder === 'audio' ? 'daily' : currentFolder;
   
   Array.from(files).forEach((file, index) => {
@@ -2824,14 +2835,21 @@ function handlePhotoUpload(event) {
         ctx.drawImage(img, 0, 0, width, height);
         
         const compressed = canvas.toDataURL('image/jpeg', 0.7);
-        db.archive.push({
-          type: 'photo',
-          data: compressed,
-          category: category,
-          time: new Date().toLocaleString('zh-CN')
-        });
-        saveDB(db);
-        renderArchive();
+        
+        if (useAPI) {
+          apiPost('/archive', { type: 'photo', data: compressed, category }).then(() => renderArchive());
+        } else {
+          const db = loadDB();
+          if (!db.archive) db.archive = [];
+          db.archive.push({
+            type: 'photo',
+            data: compressed,
+            category: category,
+            time: new Date().toLocaleString('zh-CN')
+          });
+          saveDB(db);
+          renderArchive();
+        }
         
         if (index === files.length - 1) {
           showToast('照片上传成功！');
@@ -2954,6 +2972,10 @@ function viewArchivePhoto(index) {
 function deleteArchiveItem(index) {
   if (!confirm('确定要删除吗？')) return;
   const db = loadDB();
+  const item = db.archive[index];
+  if (useAPI && item && item.id) {
+    apiDelete('/archive/' + item.id);
+  }
   db.archive.splice(index, 1);
   saveDB(db);
   renderArchive();
@@ -3509,18 +3531,22 @@ function saveSignature() {
     signatureData = tempCanvas.toDataURL('image/png');
   }
   
-  const db = loadDB();
-  if (!db.signatures) db.signatures = [];
-  db.signatures.push({
-    name: name,
-    data: signatureData,
-    time: new Date().toLocaleString('zh-CN')
-  });
-  saveDB(db);
+  if (useAPI) {
+    apiPost('/signatures', { name, data: signatureData }).then(() => renderSignatures());
+  } else {
+    const db = loadDB();
+    if (!db.signatures) db.signatures = [];
+    db.signatures.push({
+      name: name,
+      data: signatureData,
+      time: new Date().toLocaleString('zh-CN')
+    });
+    saveDB(db);
+    renderSignatures();
+  }
   
   clearSignature();
   document.getElementById('signerName').value = '';
-  renderSignatures();
   showToast('签名成功！✍️');
   fireConfetti();
 }
@@ -3528,6 +3554,10 @@ function saveSignature() {
 function deleteSignature(index) {
   if (!confirm('确定要删除这个签名吗？')) return;
   const db = loadDB();
+  const signature = db.signatures[index];
+  if (useAPI && signature && signature.id) {
+    apiDelete('/signatures/' + signature.id);
+  }
   if (!db.signatures) db.signatures = [];
   db.signatures.splice(index, 1);
   saveDB(db);
