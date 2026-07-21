@@ -890,7 +890,51 @@
       0%,100% { opacity: 1; }
       50% { opacity: 0.5; }
     }
-  </style>
+
+    /* ===== NetEase player ===== */
+    .netease-player {
+      margin-top: 12px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(0,0,0,0.05);
+    }
+    .music-playlist-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-size: 13px;
+      color: var(--ink);
+    }
+    .music-playlist-item:hover {
+      background: rgba(139,34,82,0.08);
+    }
+    .music-playlist-item.active {
+      background: rgba(139,34,82,0.12);
+      color: var(--rose-deep);
+      font-weight: 600;
+    }
+    .music-playlist-item .item-num {
+      width: 20px;
+      text-align: center;
+      color: var(--ink-soft);
+      font-size: 12px;
+    }
+    .music-playlist-item.active .item-num {
+      color: var(--rose-deep);
+    }
+    .music-playlist-item .item-icon {
+      font-size: 16px;
+    }
+    .music-playlist-item .item-name {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 </head>
 <body>
 
@@ -914,24 +958,14 @@
   <!-- Music Player -->
   <div class="music-player">
     <div class="music-panel" id="musicPanel">
-      <div class="music-title">🎵 正在播放</div>
-      <div class="music-progress" id="musicProgress" onclick="seekMusic(event)">
-        <div class="music-progress-fill" id="musicProgressFill"></div>
-      </div>
-      <div class="music-controls">
-        <button class="music-btn" onclick="prevTrack()">⏮</button>
-        <button class="music-btn play-btn" id="playBtn" onclick="togglePlay()">▶</button>
-        <button class="music-btn" onclick="nextTrack()">⏭</button>
-      </div>
-      <div class="music-info" id="musicInfo">星空下的旋律</div>
-      <div class="music-visualizer paused" id="visualizer">
-        <div class="music-bar"></div>
-        <div class="music-bar"></div>
-        <div class="music-bar"></div>
-        <div class="music-bar"></div>
-        <div class="music-bar"></div>
-      </div>
+      <div class="music-title">🎵 在线音乐</div>
       <div class="music-playlist" id="musicPlaylist"></div>
+      <div class="netease-player">
+        <iframe id="musicFrame"
+          src="https://music.163.com/outchain/player?type=2&id=1901371647&auto=0&height=66"
+          frameborder="0" allowfullscreen="true" allow="autoplay; encrypted-media"
+          style="width:100%;height:66px;border-radius:12px;"></iframe>
+      </div>
     </div>
     <button class="music-toggle" id="musicToggle" onclick="toggleMusicPanel()">🎵</button>
   </div>
@@ -1448,189 +1482,45 @@ submitRSVP = function() {
   fireConfetti();
 };
 
-// ===== Music Player (Web Audio API) =====
-const playBtn = document.getElementById('playBtn');
+// ===== Music Player (NetEase Cloud Music) =====
 const musicPanel = document.getElementById('musicPanel');
 const musicToggle = document.getElementById('musicToggle');
-const visualizer = document.getElementById('visualizer');
-const musicProgressFill = document.getElementById('musicProgressFill');
-const musicInfo = document.getElementById('musicInfo');
+const musicFrame = document.getElementById('musicFrame');
+let currentTrackIdx = 0;
 
-let audioCtx = null;
-let isPlaying = false;
-let currentMelody = 0;
-let melodyTimeout = null;
-let melodyStartTime = 0;
-let melodyDuration = 0;
-
-const melodies = [
-  {
-    name: '星空下的旋律',
-    notes: [
-      { freq: 523.25, dur: 0.4 }, { freq: 587.33, dur: 0.4 }, { freq: 659.25, dur: 0.4 },
-      { freq: 698.46, dur: 0.6 }, { freq: 659.25, dur: 0.2 }, { freq: 587.33, dur: 0.4 },
-      { freq: 523.25, dur: 0.4 }, { freq: 440.00, dur: 0.4 }, { freq: 493.88, dur: 0.4 },
-      { freq: 523.25, dur: 0.8 }, { freq: 0, dur: 0.4 },
-      { freq: 392.00, dur: 0.4 }, { freq: 440.00, dur: 0.4 }, { freq: 493.88, dur: 0.4 },
-      { freq: 523.25, dur: 0.6 }, { freq: 493.88, dur: 0.2 }, { freq: 440.00, dur: 0.4 },
-      { freq: 392.00, dur: 0.4 }, { freq: 349.23, dur: 0.4 }, { freq: 392.00, dur: 0.4 },
-      { freq: 440.00, dur: 0.8 }, { freq: 0, dur: 0.4 },
-    ]
-  },
-  {
-    name: '午后的微风',
-    notes: [
-      { freq: 440.00, dur: 0.3 }, { freq: 493.88, dur: 0.3 }, { freq: 523.25, dur: 0.3 },
-      { freq: 587.33, dur: 0.5 }, { freq: 523.25, dur: 0.5 },
-      { freq: 493.88, dur: 0.3 }, { freq: 440.00, dur: 0.3 }, { freq: 392.00, dur: 0.3 },
-      { freq: 440.00, dur: 0.8 }, { freq: 0, dur: 0.4 },
-      { freq: 523.25, dur: 0.3 }, { freq: 587.33, dur: 0.3 }, { freq: 659.25, dur: 0.3 },
-      { freq: 698.46, dur: 0.5 }, { freq: 659.25, dur: 0.5 },
-      { freq: 587.33, dur: 0.3 }, { freq: 523.25, dur: 0.3 }, { freq: 493.88, dur: 0.3 },
-      { freq: 523.25, dur: 0.8 }, { freq: 0, dur: 0.4 },
-    ]
-  },
-  {
-    name: '月光小夜曲',
-    notes: [
-      { freq: 329.63, dur: 0.5 }, { freq: 392.00, dur: 0.5 }, { freq: 493.88, dur: 0.5 },
-      { freq: 523.25, dur: 0.7 }, { freq: 493.88, dur: 0.3 },
-      { freq: 392.00, dur: 0.5 }, { freq: 329.63, dur: 0.5 }, { freq: 293.66, dur: 0.5 },
-      { freq: 329.63, dur: 1.0 }, { freq: 0, dur: 0.5 },
-      { freq: 261.63, dur: 0.5 }, { freq: 329.63, dur: 0.5 }, { freq: 392.00, dur: 0.5 },
-      { freq: 440.00, dur: 0.7 }, { freq: 392.00, dur: 0.3 },
-      { freq: 329.63, dur: 0.5 }, { freq: 261.63, dur: 0.5 }, { freq: 220.00, dur: 0.5 },
-      { freq: 261.63, dur: 1.0 }, { freq: 0, dur: 0.5 },
-    ]
-  }
+// 网易云音乐歌单 - 精选浪漫/聚会歌曲
+const songList = [
+  { id: 1901371647, name: '晴天 - 周杰伦', icon: '☀️' },
+  { id: 1974443814, name: '起风了 - 买辣椒也用券', icon: '🍃' },
+  { id: 5242914520, name: '夜曲 - 周杰伦', icon: '🌙' },
+  { id: 28756172, name: '小幸运 - 田馥甄', icon: '🍀' },
+  { id: 1457484025, name: '光年之外 - 邓紫棋', icon: '✨' },
+  { id: 33451932, name: '告白气球 - 周杰伦', icon: '🎈' },
 ];
-
-function initAudio() {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  if (audioCtx.state === 'suspended') {
-    audioCtx.resume();
-  }
-}
-
-function playNote(freq, startTime, duration, volume = 0.15) {
-  if (freq === 0) return;
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(freq, startTime);
-  gain.gain.setValueAtTime(0, startTime);
-  gain.gain.linearRampToValueAtTime(volume, startTime + 0.05);
-  gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration - 0.05);
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start(startTime);
-  osc.stop(startTime + duration);
-}
-
-function playMelody() {
-  initAudio();
-  const melody = melodies[currentMelody];
-  let time = audioCtx.currentTime;
-  melodyStartTime = time;
-  melodyDuration = melody.notes.reduce((sum, n) => sum + n.dur, 0);
-  
-  melody.notes.forEach(note => {
-    playNote(note.freq, time, note.dur);
-    time += note.dur;
-  });
-  
-  melodyTimeout = setTimeout(() => {
-    if (isPlaying) {
-      playMelody();
-    }
-  }, melodyDuration * 1000);
-}
-
-function stopMelody() {
-  if (melodyTimeout) {
-    clearTimeout(melodyTimeout);
-    melodyTimeout = null;
-  }
-}
-
-function togglePlay() {
-  if (isPlaying) {
-    isPlaying = false;
-    stopMelody();
-    playBtn.textContent = '▶';
-    musicToggle.classList.remove('playing');
-    visualizer.classList.add('paused');
-  } else {
-    isPlaying = true;
-    playMelody();
-    playBtn.textContent = '⏸';
-    musicToggle.classList.add('playing');
-    visualizer.classList.remove('paused');
-  }
-  renderPlaylist();
-}
 
 function toggleMusicPanel() {
   musicPanel.classList.toggle('show');
 }
 
-function prevTrack() {
-  stopMelody();
-  currentMelody = (currentMelody - 1 + melodies.length) % melodies.length;
-  musicInfo.textContent = melodies[currentMelody].name;
-  renderPlaylist();
-  if (isPlaying) playMelody();
+function selectSong(idx) {
+  currentTrackIdx = idx;
+  const song = songList[idx];
+  musicFrame.src = `https://music.163.com/outchain/player?type=2&id=${song.id}&auto=0&height=66`;
+  renderMusicPlaylist();
 }
 
-function nextTrack() {
-  stopMelody();
-  currentMelody = (currentMelody + 1) % melodies.length;
-  musicInfo.textContent = melodies[currentMelody].name;
-  renderPlaylist();
-  if (isPlaying) playMelody();
-}
-
-function selectTrack(idx) {
-  stopMelody();
-  currentMelody = idx;
-  musicInfo.textContent = melodies[currentMelody].name;
-  renderPlaylist();
-  if (!isPlaying) togglePlay();
-  else playMelody();
-}
-
-function seekMusic(e) {
-  const rect = e.target.getBoundingClientRect();
-  const pct = (e.clientX - rect.left) / rect.width;
-  musicProgressFill.style.width = (pct * 100) + '%';
-}
-
-function renderPlaylist() {
+function renderMusicPlaylist() {
   const playlist = document.getElementById('musicPlaylist');
-  playlist.innerHTML = melodies.map((m, i) => {
-    const isActive = i === currentMelody;
-    const playingClass = isActive && isPlaying ? ' playing' : '';
-    return `<div class="music-playlist-item${isActive ? ' active' : ''}${playingClass}" onclick="selectTrack(${i})">
-      <span class="item-num">${i + 1}</span>
-      <span class="item-playing">♪</span>
-      <span class="item-name">${m.name}</span>
+  playlist.innerHTML = songList.map((song, i) => {
+    const isActive = i === currentTrackIdx;
+    return `<div class="music-playlist-item${isActive ? ' active' : ''}" onclick="selectSong(${i})">
+      <span class="item-icon">${song.icon}</span>
+      <span class="item-name">${song.name}</span>
     </div>`;
   }).join('');
 }
 
-// Progress animation
-setInterval(() => {
-  if (isPlaying && melodyDuration > 0) {
-    const elapsed = (Date.now() / 1000) - melodyStartTime;
-    const progress = (elapsed % melodyDuration) / melodyDuration;
-    musicProgressFill.style.width = (progress * 100) + '%';
-  }
-}, 100);
-
-musicInfo.textContent = melodies[0].name;
-renderPlaylist();
+renderMusicPlaylist();
 </script>
 </body>
 </html>
