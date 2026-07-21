@@ -552,6 +552,78 @@
       display: flex;
     }
 
+    /* ===== Photo Container & Pagination ===== */
+    .photo-container {
+      width: 100%;
+      position: relative;
+    }
+
+    .photo-wall {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      width: 100%;
+      min-height: 120px;
+    }
+
+    .photo-pagination {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .photo-page-btn {
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--rose-light);
+      border-radius: 50%;
+      background: rgba(255,255,255,0.6);
+      color: var(--ink-soft);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .photo-page-btn:hover {
+      border-color: var(--rose);
+      color: var(--rose-deep);
+    }
+
+    .photo-page-btn.active {
+      background: var(--rose-deep);
+      border-color: var(--rose-deep);
+      color: white;
+    }
+
+    .photo-nav-btn {
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--rose-light);
+      border-radius: 50%;
+      background: rgba(255,255,255,0.6);
+      color: var(--ink-soft);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .photo-nav-btn:hover:not(:disabled) {
+      border-color: var(--rose);
+      color: var(--rose-deep);
+    }
+
+    .photo-nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
     /* ===== Toast ===== */
     .toast {
       position: fixed; bottom: 90px; left: 50%;
@@ -810,7 +882,7 @@
       <!-- Page 4: Photo Wall -->
       <div class="page" data-page="3">
         <div class="page-eyebrow">📸 照片墙</div>
-        <p style="font-size:12px; color:var(--ink-soft); margin-bottom:8px;">点击照片查看，长按删除</p>
+        <p style="font-size:11px; color:var(--ink-soft); margin-bottom:6px;">点击照片查看，悬停删除</p>
         
         <!-- Upload Area -->
         <div class="photo-upload-area" onclick="document.getElementById('photoInput').click()">
@@ -819,8 +891,11 @@
           <input type="file" id="photoInput" class="photo-upload-input" accept="image/*" multiple onchange="handlePhotoUpload(event)">
         </div>
         
-        <!-- Photo Grid -->
-        <div class="photo-wall" id="photoWall"></div>
+        <!-- Photo Container with Pagination -->
+        <div class="photo-container">
+          <div class="photo-wall" id="photoWall"></div>
+          <div class="photo-pagination" id="photoPagination"></div>
+        </div>
       </div>
 
       <!-- Page 5: Memory Cards -->
@@ -1084,7 +1159,10 @@ function postWish() {
   fireConfetti();
 }
 
-// ===== Photo Upload =====
+// ===== Photo Upload & Pagination =====
+let currentPhotoPage = 1;
+const photosPerPage = 6;
+
 function handlePhotoUpload(event) {
   const files = event.target.files;
   if (!files.length) return;
@@ -1095,7 +1173,6 @@ function handlePhotoUpload(event) {
   Array.from(files).forEach((file, index) => {
     const reader = new FileReader();
     reader.onload = function(e) {
-      // 压缩图片
       const img = new Image();
       img.onload = function() {
         const canvas = document.createElement('canvas');
@@ -1140,34 +1217,87 @@ function handlePhotoUpload(event) {
 function renderPhotoWall() {
   const db = loadDB();
   const wall = document.getElementById('photoWall');
+  const pagination = document.getElementById('photoPagination');
   const photos = db.photos || [];
   
   // 默认表情照片
   const defaultEmojis = ['🥂', '🌊', '🌸', '🎵', '📸', '🎉', '☀️', '🌙', '💕'];
   
-  let html = '';
+  // 如果没有上传照片，显示默认表情
+  if (photos.length === 0) {
+    let html = '';
+    defaultEmojis.forEach(emoji => {
+      html += `<div class="photo-item" onclick="viewPhoto('${emoji}')">${emoji}</div>`;
+    });
+    wall.innerHTML = html;
+    pagination.innerHTML = '';
+    return;
+  }
   
-  // 显示上传的照片
-  photos.forEach((photo, index) => {
+  // 计算总页数
+  const totalPages = Math.ceil(photos.length / photosPerPage);
+  if (currentPhotoPage > totalPages) currentPhotoPage = totalPages;
+  
+  // 获取当前页的照片
+  const start = (currentPhotoPage - 1) * photosPerPage;
+  const end = Math.min(start + photosPerPage, photos.length);
+  const currentPhotos = photos.slice(start, end);
+  
+  // 渲染照片
+  let html = '';
+  currentPhotos.forEach((photo, i) => {
+    const actualIndex = start + i;
     html += `
-      <div class="uploaded-photo" onclick="viewUploadedPhoto(${index})">
+      <div class="uploaded-photo" onclick="viewUploadedPhoto(${actualIndex})">
         <img src="${photo.data}" alt="照片">
-        <button class="photo-delete-btn" onclick="event.stopPropagation(); deletePhoto(${index})">×</button>
+        <button class="photo-delete-btn" onclick="event.stopPropagation(); deletePhoto(${actualIndex})">×</button>
       </div>
     `;
   });
+  wall.innerHTML = html;
   
-  // 显示默认表情（如果上传照片少于6张）
-  if (photos.length < 6) {
-    const emojiCount = Math.min(9 - photos.length, defaultEmojis.length);
-    for (let i = 0; i < emojiCount; i++) {
-      html += `
-        <div class="photo-item" onclick="viewPhoto('${defaultEmojis[i]}')">${defaultEmojis[i]}</div>
+  // 渲染分页
+  if (totalPages > 1) {
+    let paginationHtml = `
+      <button class="photo-nav-btn" onclick="photoPagePrev()" ${currentPhotoPage === 1 ? 'disabled' : ''}>‹</button>
+    `;
+    
+    for (let i = 1; i <= totalPages; i++) {
+      paginationHtml += `
+        <button class="photo-page-btn ${i === currentPhotoPage ? 'active' : ''}" onclick="photoGoToPage(${i})">${i}</button>
       `;
     }
+    
+    paginationHtml += `
+      <button class="photo-nav-btn" onclick="photoPageNext()" ${currentPhotoPage === totalPages ? 'disabled' : ''}>›</button>
+    `;
+    
+    pagination.innerHTML = paginationHtml;
+  } else {
+    pagination.innerHTML = '';
   }
-  
-  wall.innerHTML = html;
+}
+
+function photoGoToPage(page) {
+  currentPhotoPage = page;
+  renderPhotoWall();
+}
+
+function photoPagePrev() {
+  if (currentPhotoPage > 1) {
+    currentPhotoPage--;
+    renderPhotoWall();
+  }
+}
+
+function photoPageNext() {
+  const db = loadDB();
+  const photos = db.photos || [];
+  const totalPages = Math.ceil(photos.length / photosPerPage);
+  if (currentPhotoPage < totalPages) {
+    currentPhotoPage++;
+    renderPhotoWall();
+  }
 }
 
 function viewUploadedPhoto(index) {
