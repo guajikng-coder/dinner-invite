@@ -2385,13 +2385,49 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-// ===== Data Store =====
+// ===== Data Store with API Support =====
 const DB_KEY = 'farewell_memories';
+const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api';
+let useAPI = false;
+
+// Check if backend is available
+async function checkAPI() {
+  try {
+    const res = await fetch(API_BASE + '/health', { signal: AbortSignal.timeout(3000) });
+    if (res.ok) {
+      useAPI = true;
+      console.log('✅ 已连接后端服务器');
+      return true;
+    }
+  } catch (e) {
+    console.log('⚠️ 后端未连接，使用本地存储');
+  }
+  useAPI = false;
+  return false;
+}
+
+// Load data - try API first, fallback to localStorage
+async function loadDBAsync() {
+  if (useAPI) {
+    try {
+      const res = await fetch(API_BASE + '/data');
+      const json = await res.json();
+      if (json.success) return json.data;
+    } catch (e) {
+      console.error('API load error:', e);
+    }
+  }
+  return loadDB();
+}
+
+// Sync load for compatibility
 function loadDB() {
   try { return JSON.parse(localStorage.getItem(DB_KEY)) || defaultDB(); }
   catch { return defaultDB(); }
 }
+
 function saveDB(db) { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+
 function defaultDB() {
   return {
     wishes: [
@@ -2403,8 +2439,36 @@ function defaultDB() {
     songs: [
       { name: '朋友', artist: '周华健', link: '' },
       { name: '一路生花', artist: '温奕心', link: '' },
-    ]
+    ],
+    signatures: []
   };
+}
+
+// API helper functions
+async function apiPost(endpoint, data) {
+  if (!useAPI) return null;
+  try {
+    const res = await fetch(API_BASE + endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return await res.json();
+  } catch (e) {
+    console.error('API error:', e);
+    return null;
+  }
+}
+
+async function apiDelete(endpoint) {
+  if (!useAPI) return null;
+  try {
+    await fetch(API_BASE + endpoint, { method: 'DELETE' });
+    return true;
+  } catch (e) {
+    console.error('API error:', e);
+    return null;
+  }
 }
 
 // ===== Countdown =====
@@ -2517,6 +2581,10 @@ function toggleBlindBox(index) {
 function deleteWish(index) {
   if (!confirm('确定要删除这条留言吗？')) return;
   const db = loadDB();
+  const wish = db.wishes[index];
+  if (useAPI && wish && wish.id) {
+    apiDelete('/wishes/' + wish.id);
+  }
   db.wishes.splice(index, 1);
   saveDB(db);
   renderWishes();
@@ -2548,15 +2616,24 @@ function postWish() {
   const name = document.getElementById('wishName').value.trim();
   const text = document.getElementById('wishContent').value.trim();
   if (!name || !text) { showToast('请填写名字和留言'); return; }
-  const db = loadDB();
-  if (!db.wishes) db.wishes = [];
-  db.wishes.push({ name, text, time: new Date().toLocaleString('zh-CN') });
-  saveDB(db);
+  
+  if (useAPI) {
+    apiPost('/wishes', { name, text }).then(() => renderWishes());
+  } else {
+    const db = loadDB();
+    if (!db.wishes) db.wishes = [];
+    db.wishes.push({ name, text, time: new Date().toLocaleString('zh-CN') });
+    saveDB(db);
+    renderWishes();
+  }
+  
   document.getElementById('wishName').value = '';
   document.getElementById('wishContent').value = '';
-  const totalPages = Math.ceil(db.wishes.length / wishesPerPage);
+  const totalPages = Math.ceil((loadDB().wishes || []).length / wishesPerPage);
   currentWishPage = totalPages;
-  renderWishes();
+  showToast('祝福已放入盲盒！🎁');
+  fireConfetti();
+}
   showToast('祝福已放入盲盒！🎁');
   fireConfetti();
 }
@@ -3558,14 +3635,27 @@ function importData(event) {
 }
 
 // ===== Init =====
-renderWishes();
-renderCapsules();
-renderSongs();
-renderArchive();
-renderTimeScroll();
-initSignature();
-createCherryBlossom();
-startFloatingSignatures();
+async function init() {
+  // Check for backend API
+  await checkAPI();
+  
+  // Render all sections
+  renderWishes();
+  renderCapsules();
+  renderSongs();
+  renderArchive();
+  renderTimeScroll();
+  initSignature();
+  createCherryBlossom();
+  startFloatingSignatures();
+  
+  // Show connection status
+  if (useAPI) {
+    showToast('✅ 已连接服务器，数据实时同步');
+  }
+}
+
+init();
 </script>
 </body>
 </html>
