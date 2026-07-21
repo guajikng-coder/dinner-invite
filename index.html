@@ -3687,9 +3687,9 @@ async function init() {
   createCherryBlossom();
   startFloatingSignatures();
   
-  // Show connection status
+  // Connection status logged to console only
   if (useAPI) {
-    showToast('✅ 已连接服务器，数据实时同步');
+    console.log('✅ 已连接服务器');
   }
 }
 
