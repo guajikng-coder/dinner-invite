@@ -609,6 +609,222 @@
       justify-content: center;
     }
 
+    /* ===== Folder Tabs ===== */
+    .folder-tabs {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+      margin-bottom: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .folder-tab {
+      padding: 5px 12px;
+      background: rgba(255,255,255,0.5);
+      border: 1px solid var(--rose-light);
+      border-radius: 15px;
+      font-size: 11px;
+      color: var(--ink-soft);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .folder-tab:hover {
+      background: rgba(199,107,138,0.1);
+    }
+
+    .folder-tab.active {
+      background: var(--rose-deep);
+      border-color: var(--rose-deep);
+      color: white;
+    }
+
+    /* ===== Archive Content ===== */
+    .archive-content {
+      width: 100%;
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 8px;
+    }
+
+    .archive-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .archive-item {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: rgba(255,255,255,0.4);
+    }
+
+    .archive-item:hover {
+      transform: scale(1.03);
+    }
+
+    .archive-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .archive-item .archive-emoji {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .archive-item .archive-tag {
+      position: absolute;
+      bottom: 2px;
+      left: 2px;
+      padding: 2px 6px;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      font-size: 8px;
+      border-radius: 4px;
+    }
+
+    .archive-item .archive-delete {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 16px;
+      height: 16px;
+      background: rgba(139,34,82,0.8);
+      border: none;
+      border-radius: 50%;
+      color: white;
+      font-size: 10px;
+      cursor: pointer;
+      display: none;
+    }
+
+    .archive-item:hover .archive-delete {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .archive-note {
+      grid-column: span 3;
+      padding: 10px;
+      background: rgba(255,255,255,0.5);
+      border-radius: 8px;
+      border-left: 3px solid var(--gold);
+      text-align: left;
+    }
+
+    .archive-note-text {
+      font-size: 12px;
+      color: var(--ink);
+      line-height: 1.4;
+    }
+
+    .archive-note-meta {
+      font-size: 9px;
+      color: var(--ink-soft);
+      margin-top: 4px;
+    }
+
+    .archive-audio {
+      grid-column: span 3;
+      padding: 10px;
+      background: rgba(255,255,255,0.5);
+      border-radius: 8px;
+      border-left: 3px solid var(--rose);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .archive-audio-icon {
+      font-size: 20px;
+    }
+
+    .archive-audio audio {
+      flex: 1;
+      height: 32px;
+    }
+
+    .archive-audio-delete {
+      width: 18px;
+      height: 18px;
+      background: rgba(139,34,82,0.7);
+      border: none;
+      border-radius: 50%;
+      color: white;
+      font-size: 10px;
+      cursor: pointer;
+    }
+
+    /* ===== Archive Actions ===== */
+    .archive-actions {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .archive-upload-btn {
+      flex: 1;
+      padding: 8px 6px;
+      background: rgba(255,255,255,0.5);
+      border: 1px solid var(--rose-light);
+      border-radius: 10px;
+      font-size: 11px;
+      color: var(--ink);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .archive-upload-btn:hover {
+      background: rgba(199,107,138,0.1);
+      border-color: var(--rose);
+    }
+
+    /* ===== Recording Indicator ===== */
+    .recording-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: rgba(139,34,82,0.1);
+      border-radius: 8px;
+      width: 100%;
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--rose-deep);
+    }
+
+    .recording-dot {
+      width: 10px;
+      height: 10px;
+      background: #f44336;
+      border-radius: 50%;
+      animation: recording-blink 1s ease-in-out infinite;
+    }
+
+    @keyframes recording-blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .note-input-area {
+      width: 100%;
+      margin-top: 6px;
+    }
+
     /* ===== Form ===== */
     .form-group { width: 100%; margin-bottom: 10px; text-align: left; }
     .form-label { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--rose); margin-bottom: 4px; display: block; }
@@ -1068,22 +1284,55 @@
         </div>
       </div>
 
-      <!-- Page 4: Photo Wall -->
+      <!-- Page 4: Archive (Photos, Audio, Notes) -->
       <div class="page" data-page="3">
-        <div class="page-eyebrow">📸 照片墙</div>
-        <p style="font-size:11px; color:var(--ink-soft); margin-bottom:6px;">点击照片查看，悬停删除</p>
+        <div class="page-eyebrow">📁 回忆档案</div>
         
-        <!-- Upload Area -->
-        <div class="photo-upload-area" onclick="document.getElementById('photoInput').click()">
-          <div class="photo-upload-icon">📷</div>
-          <div class="photo-upload-text">点击上传照片</div>
-          <input type="file" id="photoInput" class="photo-upload-input" accept="image/*" multiple onchange="handlePhotoUpload(event)">
+        <!-- Folder Tabs -->
+        <div class="folder-tabs">
+          <div class="folder-tab active" onclick="switchFolder('all')">全部</div>
+          <div class="folder-tab" onclick="switchFolder('daily')">日常</div>
+          <div class="folder-tab" onclick="switchFolder('travel')">旅行</div>
+          <div class="folder-tab" onclick="switchFolder('party')">聚会</div>
+          <div class="folder-tab" onclick="switchFolder('audio')">录音</div>
         </div>
         
-        <!-- Photo Container with Pagination -->
-        <div class="photo-container">
-          <div class="photo-wall" id="photoWall"></div>
-          <div class="photo-pagination" id="photoPagination"></div>
+        <!-- Content Area -->
+        <div class="archive-content" id="archiveContent">
+          <div class="archive-grid" id="archiveGrid"></div>
+          <div class="photo-pagination" id="archivePagination"></div>
+        </div>
+        
+        <!-- Upload Area -->
+        <div class="archive-actions">
+          <div class="archive-upload-btn" onclick="document.getElementById('photoInput').click()">
+            📷 上传照片
+            <input type="file" id="photoInput" class="photo-upload-input" accept="image/*" multiple onchange="handlePhotoUpload(event)">
+          </div>
+          <div class="archive-upload-btn" onclick="startRecording()" id="recordBtn">
+            🎤 录音
+          </div>
+          <div class="archive-upload-btn" onclick="document.getElementById('noteInput').focus()">
+            📝 笔记
+          </div>
+        </div>
+        
+        <!-- Note Input (Hidden by default) -->
+        <div class="note-input-area" id="noteInputArea" style="display:none;">
+          <select class="form-select" id="noteCategory" style="margin-bottom:4px;">
+            <option value="daily">日常</option>
+            <option value="travel">旅行</option>
+            <option value="party">聚会</option>
+          </select>
+          <textarea class="form-textarea" id="noteInput" placeholder="写下这一刻..." style="min-height:40px;"></textarea>
+          <button class="btn" style="width:100%; margin-top:4px;" onclick="saveNote()">保存笔记</button>
+        </div>
+        
+        <!-- Recording Indicator -->
+        <div class="recording-indicator" id="recordingIndicator" style="display:none;">
+          <div class="recording-dot"></div>
+          <span>正在录音...</span>
+          <button class="btn" style="padding:6px 12px; font-size:11px;" onclick="stopRecording()">停止</button>
         </div>
       </div>
 
@@ -1271,7 +1520,7 @@ function defaultDB() {
       { name: '小美', text: '虽然要分开了，但我们的友谊不会变！', time: '昨天' },
       { name: '阿杰', text: '期待下次相聚的那天！', time: '2小时前' },
     ],
-    photos: [],
+    archive: [],
     capsules: [],
     songs: [
       { name: '朋友', artist: '周华健', link: '' },
@@ -1561,16 +1810,40 @@ function deleteSong(index) {
   showToast('歌曲已删除');
 }
 
-// ===== Photo Upload & Pagination =====
-let currentPhotoPage = 1;
-const photosPerPage = 6;
+// ===== Archive (Photos, Audio, Notes) =====
+let currentFolder = 'all';
+let currentArchivePage = 1;
+const archivePerPage = 6;
+let mediaRecorder = null;
+let audioChunks = [];
+
+function switchFolder(folder) {
+  currentFolder = folder;
+  currentArchivePage = 1;
+  document.querySelectorAll('.folder-tab').forEach(tab => {
+    tab.classList.toggle('active', tab.textContent.includes(getFolderName(folder)));
+  });
+  renderArchive();
+}
+
+function getFolderName(folder) {
+  const names = { all: '全部', daily: '日常', travel: '旅行', party: '聚会', audio: '录音' };
+  return names[folder] || '全部';
+}
+
+function getFolderTag(folder) {
+  const tags = { daily: '日常', travel: '旅行', party: '聚会' };
+  return tags[folder] || '';
+}
 
 function handlePhotoUpload(event) {
   const files = event.target.files;
   if (!files.length) return;
   
   const db = loadDB();
-  if (!db.photos) db.photos = [];
+  if (!db.archive) db.archive = [];
+  
+  const category = currentFolder === 'all' || currentFolder === 'audio' ? 'daily' : currentFolder;
   
   Array.from(files).forEach((file, index) => {
     const reader = new FileReader();
@@ -1596,12 +1869,14 @@ function handlePhotoUpload(event) {
         ctx.drawImage(img, 0, 0, width, height);
         
         const compressed = canvas.toDataURL('image/jpeg', 0.7);
-        db.photos.push({
+        db.archive.push({
+          type: 'photo',
           data: compressed,
+          category: category,
           time: new Date().toLocaleString('zh-CN')
         });
         saveDB(db);
-        renderPhotoWall();
+        renderArchive();
         
         if (index === files.length - 1) {
           showToast('照片上传成功！');
@@ -1616,112 +1891,195 @@ function handlePhotoUpload(event) {
   event.target.value = '';
 }
 
-function renderPhotoWall() {
+function renderArchive() {
   const db = loadDB();
-  const wall = document.getElementById('photoWall');
-  const pagination = document.getElementById('photoPagination');
-  const photos = db.photos || [];
+  const grid = document.getElementById('archiveGrid');
+  const pagination = document.getElementById('archivePagination');
+  const items = (db.archive || []).filter(item => {
+    if (currentFolder === 'all') return true;
+    if (currentFolder === 'audio') return item.type === 'audio';
+    return item.category === currentFolder;
+  });
   
-  // 默认表情照片
-  const defaultEmojis = ['🥂', '🌊', '🌸', '🎵', '📸', '🎉', '☀️', '🌙', '💕'];
-  
-  // 如果没有上传照片，显示默认表情
-  if (photos.length === 0) {
-    let html = '';
-    defaultEmojis.forEach(emoji => {
-      html += `<div class="photo-item" onclick="viewPhoto('${emoji}')">${emoji}</div>`;
-    });
-    wall.innerHTML = html;
+  if (!items.length) {
+    grid.innerHTML = '<div style="grid-column: span 3; text-align:center; color:var(--ink-soft); font-size:12px; padding:16px 0;">这里还没有内容，上传照片或录音吧！</div>';
     pagination.innerHTML = '';
     return;
   }
   
-  // 计算总页数
-  const totalPages = Math.ceil(photos.length / photosPerPage);
-  if (currentPhotoPage > totalPages) currentPhotoPage = totalPages;
+  // 分页
+  const totalPages = Math.ceil(items.length / archivePerPage);
+  if (currentArchivePage > totalPages) currentArchivePage = totalPages;
+  const start = (currentArchivePage - 1) * archivePerPage;
+  const end = Math.min(start + archivePerPage, items.length);
+  const currentItems = items.slice(start, end);
   
-  // 获取当前页的照片
-  const start = (currentPhotoPage - 1) * photosPerPage;
-  const end = Math.min(start + photosPerPage, photos.length);
-  const currentPhotos = photos.slice(start, end);
-  
-  // 渲染照片
-  let html = '';
-  currentPhotos.forEach((photo, i) => {
-    const actualIndex = start + i;
-    html += `
-      <div class="uploaded-photo" onclick="viewUploadedPhoto(${actualIndex})">
-        <img src="${photo.data}" alt="照片">
-        <button class="photo-delete-btn" onclick="event.stopPropagation(); deletePhoto(${actualIndex})">×</button>
-      </div>
-    `;
-  });
-  wall.innerHTML = html;
-  
-  // 渲染分页
-  if (totalPages > 1) {
-    let paginationHtml = `
-      <button class="photo-nav-btn" onclick="photoPagePrev()" ${currentPhotoPage === 1 ? 'disabled' : ''}>‹</button>
-    `;
-    
-    for (let i = 1; i <= totalPages; i++) {
-      paginationHtml += `
-        <button class="photo-page-btn ${i === currentPhotoPage ? 'active' : ''}" onclick="photoGoToPage(${i})">${i}</button>
+  grid.innerHTML = currentItems.map((item, i) => {
+    const actualIndex = db.archive.indexOf(item);
+    if (item.type === 'photo') {
+      return `
+        <div class="archive-item" onclick="viewArchivePhoto(${actualIndex})">
+          <img src="${item.data}" alt="照片">
+          <span class="archive-tag">${getFolderTag(item.category)}</span>
+          <button class="archive-delete" onclick="event.stopPropagation(); deleteArchiveItem(${actualIndex})">×</button>
+        </div>
+      `;
+    } else if (item.type === 'audio') {
+      return `
+        <div class="archive-audio">
+          <span class="archive-audio-icon">🎤</span>
+          <audio controls src="${item.data}"></audio>
+          <span class="archive-tag">${getFolderTag(item.category)}</span>
+          <button class="archive-audio-delete" onclick="deleteArchiveItem(${actualIndex})">×</button>
+        </div>
+      `;
+    } else if (item.type === 'note') {
+      return `
+        <div class="archive-note">
+          <div class="archive-note-text">${esc(item.text)}</div>
+          <div class="archive-note-meta">${getFolderTag(item.category)} · ${esc(item.time)}</div>
+          <button class="archive-delete" style="display:inline-flex;" onclick="deleteArchiveItem(${actualIndex})">×</button>
+        </div>
       `;
     }
-    
-    paginationHtml += `
-      <button class="photo-nav-btn" onclick="photoPageNext()" ${currentPhotoPage === totalPages ? 'disabled' : ''}>›</button>
-    `;
-    
-    pagination.innerHTML = paginationHtml;
+    return '';
+  }).join('');
+  
+  // 分页
+  if (totalPages > 1) {
+    let html = `<button class="photo-nav-btn" onclick="archivePagePrev()" ${currentArchivePage === 1 ? 'disabled' : ''}>‹</button>`;
+    for (let i = 1; i <= totalPages; i++) {
+      html += `<button class="photo-page-btn ${i === currentArchivePage ? 'active' : ''}" onclick="archiveGoToPage(${i})">${i}</button>`;
+    }
+    html += `<button class="photo-nav-btn" onclick="archivePageNext()" ${currentArchivePage === totalPages ? 'disabled' : ''}>›</button>`;
+    pagination.innerHTML = html;
   } else {
     pagination.innerHTML = '';
   }
 }
 
-function photoGoToPage(page) {
-  currentPhotoPage = page;
-  renderPhotoWall();
+function archiveGoToPage(page) {
+  currentArchivePage = page;
+  renderArchive();
 }
 
-function photoPagePrev() {
-  if (currentPhotoPage > 1) {
-    currentPhotoPage--;
-    renderPhotoWall();
+function archivePagePrev() {
+  if (currentArchivePage > 1) {
+    currentArchivePage--;
+    renderArchive();
   }
 }
 
-function photoPageNext() {
+function archivePageNext() {
   const db = loadDB();
-  const photos = db.photos || [];
-  const totalPages = Math.ceil(photos.length / photosPerPage);
-  if (currentPhotoPage < totalPages) {
-    currentPhotoPage++;
-    renderPhotoWall();
+  const items = (db.archive || []).filter(item => {
+    if (currentFolder === 'all') return true;
+    if (currentFolder === 'audio') return item.type === 'audio';
+    return item.category === currentFolder;
+  });
+  const totalPages = Math.ceil(items.length / archivePerPage);
+  if (currentArchivePage < totalPages) {
+    currentArchivePage++;
+    renderArchive();
   }
 }
 
-function viewUploadedPhoto(index) {
+function viewArchivePhoto(index) {
   const db = loadDB();
-  const photo = db.photos[index];
-  if (!photo) return;
+  const item = db.archive[index];
+  if (!item || item.type !== 'photo') return;
   
   const viewer = document.getElementById('photoViewer');
   const content = document.getElementById('photoViewerContent');
-  content.innerHTML = `<img src="${photo.data}" class="photo-viewer-img">`;
+  content.innerHTML = `<img src="${item.data}" class="photo-viewer-img">`;
   viewer.classList.add('show');
   fireConfetti();
 }
 
-function deletePhoto(index) {
-  if (!confirm('确定要删除这张照片吗？')) return;
+function deleteArchiveItem(index) {
+  if (!confirm('确定要删除吗？')) return;
   const db = loadDB();
-  db.photos.splice(index, 1);
+  db.archive.splice(index, 1);
   saveDB(db);
-  renderPhotoWall();
-  showToast('照片已删除');
+  renderArchive();
+  showToast('已删除');
 }
+
+// ===== Audio Recording =====
+async function startRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    
+    mediaRecorder.ondataavailable = (event) => {
+      audioChunks.push(event.data);
+    };
+    
+    mediaRecorder.onstop = () => {
+      const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const db = loadDB();
+        if (!db.archive) db.archive = [];
+        const category = currentFolder === 'all' || currentFolder === 'audio' ? 'daily' : currentFolder;
+        db.archive.push({
+          type: 'audio',
+          data: e.target.result,
+          category: category,
+          time: new Date().toLocaleString('zh-CN')
+        });
+        saveDB(db);
+        renderArchive();
+        showToast('录音保存成功！');
+      };
+      reader.readAsDataURL(audioBlob);
+      
+      stream.getTracks().forEach(track => track.stop());
+    };
+    
+    mediaRecorder.start();
+    document.getElementById('recordingIndicator').style.display = 'flex';
+    document.getElementById('recordBtn').style.display = 'none';
+  } catch (err) {
+    showToast('无法访问麦克风');
+  }
+}
+
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop();
+  }
+  document.getElementById('recordingIndicator').style.display = 'none';
+  document.getElementById('recordBtn').style.display = 'block';
+}
+
+// ===== Notes =====
+function saveNote() {
+  const text = document.getElementById('noteInput').value.trim();
+  if (!text) { showToast('请输入笔记内容'); return; }
+  
+  const db = loadDB();
+  if (!db.archive) db.archive = [];
+  const category = document.getElementById('noteCategory').value;
+  db.archive.push({
+    type: 'note',
+    text: text,
+    category: category,
+    time: new Date().toLocaleString('zh-CN')
+  });
+  saveDB(db);
+  
+  document.getElementById('noteInput').value = '';
+  document.getElementById('noteInputArea').style.display = 'none';
+  renderArchive();
+  showToast('笔记已保存！');
+}
+
+// Toggle note input
+document.getElementById('noteInput')?.addEventListener('focus', () => {
+  document.getElementById('noteInputArea').style.display = 'block';
+});
 
 // ===== Confetti =====
 function fireConfetti() {
@@ -1829,7 +2187,7 @@ function esc(s) { const d = document.createElement('div'); d.textContent = s; re
 renderWishes();
 renderCapsules();
 renderSongs();
-renderPhotoWall();
+renderArchive();
 createCherryBlossom();
 </script>
 </body>
