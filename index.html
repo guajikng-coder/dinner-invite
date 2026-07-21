@@ -358,6 +358,29 @@
       text-align: center;
     }
 
+    .wish-delete-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 18px;
+      height: 18px;
+      background: rgba(139,34,82,0.7);
+      border: none;
+      border-radius: 50%;
+      color: white;
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .blind-box-back:hover .wish-delete-btn {
+      opacity: 1;
+    }
+
     .blind-box-sparkle {
       position: absolute;
       width: 6px;
@@ -938,13 +961,14 @@
       <!-- Page 6: Wishes Board (Blind Box) -->
       <div class="page" data-page="5">
         <div class="page-eyebrow">💌 留言盲盒</div>
-        <p style="font-size:11px; color:var(--ink-soft); margin-bottom:8px;">点击盲盒，拆开朋友们的祝福</p>
+        <p style="font-size:11px; color:var(--ink-soft); margin-bottom:6px;">点击盲盒，拆开/关闭朋友们的祝福</p>
         <div class="wishes-board" id="wishesBoard"></div>
-        <div style="width:100%; border-top: 1px solid var(--rose-light); padding-top:10px;">
-          <p style="font-size:11px; color:var(--ink-soft); margin-bottom:6px;">✨ 写下你的祝福</p>
-          <input class="form-input" id="wishName" placeholder="你的名字" maxlength="10" style="margin-bottom:6px;">
-          <textarea class="form-textarea" id="wishContent" placeholder="写下你想说的话..." maxlength="150" style="min-height:40px;"></textarea>
-          <button class="btn" style="margin-top:6px; width:100%;" onclick="postWish()">放入盲盒 🎁</button>
+        <div class="photo-pagination" id="wishPagination"></div>
+        <div style="width:100%; border-top: 1px solid var(--rose-light); padding-top:8px; margin-top:8px;">
+          <p style="font-size:11px; color:var(--ink-soft); margin-bottom:4px;">✨ 写下你的祝福</p>
+          <input class="form-input" id="wishName" placeholder="你的名字" maxlength="10" style="margin-bottom:4px;">
+          <textarea class="form-textarea" id="wishContent" placeholder="写下你想说的话..." maxlength="150" style="min-height:36px;"></textarea>
+          <button class="btn" style="margin-top:4px; width:100%;" onclick="postWish()">放入盲盒 🎁</button>
         </div>
       </div>
 
@@ -1083,23 +1107,32 @@ function closePhotoViewer() { document.getElementById('photoViewer').classList.r
 
 // ===== Wishes Board (Blind Box) =====
 const blindBoxIcons = ['🎁', '🎀', '💝', '🎊', '🎈', '✨', '🌟', '💫', '🎉'];
+let currentWishPage = 1;
+const wishesPerPage = 6;
 
 function renderWishes() {
   const db = loadDB();
   const board = document.getElementById('wishesBoard');
-  const openedKey = 'opened_wishes';
-  const opened = JSON.parse(localStorage.getItem(openedKey) || '[]');
+  const pagination = document.getElementById('wishPagination');
   
   if (!db.wishes || !db.wishes.length) {
     board.innerHTML = '<div style="text-align:center; color:var(--ink-soft); font-size:12px; padding:16px 0;">还没有留言，做第一个吧！</div>';
+    if (pagination) pagination.innerHTML = '';
     return;
   }
   
-  board.innerHTML = '<div class="blind-box-grid">' + db.wishes.map((w, i) => {
-    const isOpened = opened.includes(i);
-    const icon = blindBoxIcons[i % blindBoxIcons.length];
+  // 分页
+  const totalPages = Math.ceil(db.wishes.length / wishesPerPage);
+  if (currentWishPage > totalPages) currentWishPage = totalPages;
+  const start = (currentWishPage - 1) * wishesPerPage;
+  const end = Math.min(start + wishesPerPage, db.wishes.length);
+  const currentWishes = db.wishes.slice(start, end);
+  
+  board.innerHTML = '<div class="blind-box-grid">' + currentWishes.map((w, i) => {
+    const actualIndex = start + i;
+    const icon = blindBoxIcons[actualIndex % blindBoxIcons.length];
     return `
-      <div class="blind-box ${isOpened ? 'opened' : ''}" onclick="openBlindBox(${i})">
+      <div class="blind-box" id="wish-box-${actualIndex}" onclick="toggleBlindBox(${actualIndex})">
         <div class="blind-box-inner">
           <div class="blind-box-front">
             <div class="blind-box-icon">${icon}</div>
@@ -1109,29 +1142,36 @@ function renderWishes() {
             <div class="blind-box-author">${esc(w.name)}</div>
             <div class="blind-box-text">${esc(w.text)}</div>
             <div class="blind-box-time">${esc(w.time)}</div>
+            <button class="wish-delete-btn" onclick="event.stopPropagation(); deleteWish(${actualIndex})">×</button>
           </div>
         </div>
       </div>
     `;
   }).join('') + '</div>';
+  
+  // 分页控件
+  if (pagination && totalPages > 1) {
+    let html = `<button class="photo-nav-btn" onclick="wishPagePrev()" ${currentWishPage === 1 ? 'disabled' : ''}>‹</button>`;
+    for (let i = 1; i <= totalPages; i++) {
+      html += `<button class="photo-page-btn ${i === currentWishPage ? 'active' : ''}" onclick="wishGoToPage(${i})">${i}</button>`;
+    }
+    html += `<button class="photo-nav-btn" onclick="wishPageNext()" ${currentWishPage === totalPages ? 'disabled' : ''}>›</button>`;
+    pagination.innerHTML = html;
+  } else if (pagination) {
+    pagination.innerHTML = '';
+  }
 }
 
-function openBlindBox(index) {
-  const openedKey = 'opened_wishes';
-  const opened = JSON.parse(localStorage.getItem(openedKey) || '[]');
+function toggleBlindBox(index) {
+  const box = document.getElementById(`wish-box-${index}`);
+  if (!box) return;
   
-  if (opened.includes(index)) return;
+  const isOpened = box.classList.contains('opened');
   
-  opened.push(index);
-  localStorage.setItem(openedKey, JSON.stringify(opened));
-  
-  const boxes = document.querySelectorAll('.blind-box');
-  const box = boxes[index];
-  
-  if (box) {
+  if (isOpened) {
+    box.classList.remove('opened');
+  } else {
     box.classList.add('opened');
-    
-    // 创建金色火花
     const rect = box.getBoundingClientRect();
     for (let i = 0; i < 8; i++) {
       const sparkle = document.createElement('div');
@@ -1141,6 +1181,36 @@ function openBlindBox(index) {
       document.body.appendChild(sparkle);
       setTimeout(() => sparkle.remove(), 800);
     }
+  }
+}
+
+function deleteWish(index) {
+  if (!confirm('确定要删除这条留言吗？')) return;
+  const db = loadDB();
+  db.wishes.splice(index, 1);
+  saveDB(db);
+  renderWishes();
+  showToast('留言已删除');
+}
+
+function wishGoToPage(page) {
+  currentWishPage = page;
+  renderWishes();
+}
+
+function wishPagePrev() {
+  if (currentWishPage > 1) {
+    currentWishPage--;
+    renderWishes();
+  }
+}
+
+function wishPageNext() {
+  const db = loadDB();
+  const totalPages = Math.ceil((db.wishes || []).length / wishesPerPage);
+  if (currentWishPage < totalPages) {
+    currentWishPage++;
+    renderWishes();
   }
 }
 
@@ -1154,6 +1224,8 @@ function postWish() {
   saveDB(db);
   document.getElementById('wishName').value = '';
   document.getElementById('wishContent').value = '';
+  const totalPages = Math.ceil(db.wishes.length / wishesPerPage);
+  currentWishPage = totalPages;
   renderWishes();
   showToast('祝福已放入盲盒！🎁');
   fireConfetti();
