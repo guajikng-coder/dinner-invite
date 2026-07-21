@@ -614,6 +614,144 @@
       font-size: 24px;
       margin-bottom: 8px;
     }
+
+    /* ===== Music player ===== */
+    .music-player {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 997;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 12px;
+    }
+    .music-panel {
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 16px;
+      width: 260px;
+      display: none;
+      box-shadow: 0 8px 32px rgba(139,34,82,0.15);
+    }
+    .music-panel.show { display: block; animation: fade-up 0.3s ease; }
+    .music-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--rose-deep);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .music-progress {
+      width: 100%;
+      height: 4px;
+      background: var(--rose-light);
+      border-radius: 2px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      position: relative;
+    }
+    .music-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--rose-deep), var(--rose));
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.1s linear;
+    }
+    .music-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+    .music-btn {
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      color: var(--ink-soft);
+      transition: transform 0.2s, color 0.2s;
+      padding: 4px;
+    }
+    .music-btn:hover { transform: scale(1.2); color: var(--rose-deep); }
+    .music-btn.play-btn {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, var(--rose-deep), var(--rose));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 16px;
+    }
+    .music-btn.play-btn:hover { transform: scale(1.1); }
+    .music-info {
+      font-size: 11px;
+      color: var(--ink-soft);
+      text-align: center;
+      margin-top: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .music-toggle {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, var(--rose-deep), var(--rose));
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: white;
+      box-shadow: 0 4px 20px rgba(139,34,82,0.3);
+      transition: transform 0.3s, box-shadow 0.3s;
+      animation: heart-bob 3s ease-in-out infinite;
+    }
+    .music-toggle:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 28px rgba(139,34,82,0.4);
+    }
+    .music-toggle.playing {
+      animation: pulse-glow 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse-glow {
+      0%,100% { box-shadow: 0 4px 20px rgba(139,34,82,0.3); }
+      50% { box-shadow: 0 4px 30px rgba(139,34,82,0.5), 0 0 40px rgba(201,169,110,0.3); }
+    }
+    .music-visualizer {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 20px;
+      margin-top: 12px;
+      justify-content: center;
+    }
+    .music-bar {
+      width: 4px;
+      background: linear-gradient(to top, var(--rose-deep), var(--rose));
+      border-radius: 2px;
+      animation: music-dance 0.8s ease-in-out infinite alternate;
+    }
+    .music-bar:nth-child(1) { animation-delay: 0s; height: 8px; }
+    .music-bar:nth-child(2) { animation-delay: 0.1s; height: 14px; }
+    .music-bar:nth-child(3) { animation-delay: 0.2s; height: 10px; }
+    .music-bar:nth-child(4) { animation-delay: 0.3s; height: 16px; }
+    .music-bar:nth-child(5) { animation-delay: 0.15s; height: 12px; }
+    @keyframes music-dance {
+      0% { transform: scaleY(0.5); }
+      100% { transform: scaleY(1.2); }
+    }
+    .music-visualizer.paused .music-bar {
+      animation-play-state: paused;
+    }
   </style>
 </head>
 <body>
@@ -634,6 +772,33 @@
 
   <!-- Toast -->
   <div class="toast" id="toast"></div>
+
+  <!-- Music Player -->
+  <audio id="bgMusic" loop preload="auto">
+    <source src="https://cdn.jsdelivr.net/gh/nicehash/Awesome-Music@main/BGM/sweet-memories.mp3" type="audio/mpeg">
+  </audio>
+  <div class="music-player">
+    <div class="music-panel" id="musicPanel">
+      <div class="music-title">🎵 正在播放</div>
+      <div class="music-progress" id="musicProgress" onclick="seekMusic(event)">
+        <div class="music-progress-fill" id="musicProgressFill"></div>
+      </div>
+      <div class="music-controls">
+        <button class="music-btn" onclick="prevTrack()">⏮</button>
+        <button class="music-btn play-btn" id="playBtn" onclick="togglePlay()">▶</button>
+        <button class="music-btn" onclick="nextTrack()">⏭</button>
+      </div>
+      <div class="music-info" id="musicInfo">甜蜜的回忆 - 轻音乐</div>
+      <div class="music-visualizer paused" id="visualizer">
+        <div class="music-bar"></div>
+        <div class="music-bar"></div>
+        <div class="music-bar"></div>
+        <div class="music-bar"></div>
+        <div class="music-bar"></div>
+      </div>
+    </div>
+    <button class="music-toggle" id="musicToggle" onclick="toggleMusicPanel()">🎵</button>
+  </div>
 
   <div class="invitation" style="padding-top:40px;">
 
@@ -1146,6 +1311,85 @@ submitRSVP = function() {
   showToast('报名成功！期待与你相见');
   fireConfetti();
 };
+
+// ===== Music Player =====
+const bgMusic = document.getElementById('bgMusic');
+const playBtn = document.getElementById('playBtn');
+const musicPanel = document.getElementById('musicPanel');
+const musicToggle = document.getElementById('musicToggle');
+const visualizer = document.getElementById('visualizer');
+const musicProgressFill = document.getElementById('musicProgressFill');
+const musicInfo = document.getElementById('musicInfo');
+
+const playlist = [
+  { name: '甜蜜的回忆 - 轻音乐', url: 'https://cdn.jsdelivr.net/gh/nicehash/Awesome-Music@main/BGM/sweet-memories.mp3' },
+  { name: '月光小夜曲 - 钢琴曲', url: 'https://cdn.jsdelivr.net/gh/nicehash/Awesome-Music@main/BGM/moonlight-sonata.mp3' },
+  { name: '午后的阳光 - 吉他曲', url: 'https://cdn.jsdelivr.net/gh/nicehash/Awesome-Music@main/BGM/afternoon-sunshine.mp3' },
+];
+let currentTrack = 0;
+let isPlaying = false;
+
+function loadTrack(idx) {
+  currentTrack = idx % playlist.length;
+  bgMusic.src = playlist[currentTrack].url;
+  musicInfo.textContent = playlist[currentTrack].name;
+}
+
+function togglePlay() {
+  if (isPlaying) {
+    bgMusic.pause();
+  } else {
+    bgMusic.play().catch(() => {});
+  }
+}
+
+function toggleMusicPanel() {
+  musicPanel.classList.toggle('show');
+}
+
+function prevTrack() {
+  loadTrack(currentTrack - 1);
+  if (isPlaying) bgMusic.play().catch(() => {});
+}
+
+function nextTrack() {
+  loadTrack(currentTrack + 1);
+  if (isPlaying) bgMusic.play().catch(() => {});
+}
+
+function seekMusic(e) {
+  const rect = e.target.getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  bgMusic.currentTime = bgMusic.duration * pct;
+}
+
+bgMusic.addEventListener('play', () => {
+  isPlaying = true;
+  playBtn.textContent = '⏸';
+  musicToggle.classList.add('playing');
+  visualizer.classList.remove('paused');
+});
+
+bgMusic.addEventListener('pause', () => {
+  isPlaying = false;
+  playBtn.textContent = '▶';
+  musicToggle.classList.remove('playing');
+  visualizer.classList.add('paused');
+});
+
+bgMusic.addEventListener('timeupdate', () => {
+  if (bgMusic.duration) {
+    musicProgressFill.style.width = (bgMusic.currentTime / bgMusic.duration * 100) + '%';
+  }
+});
+
+bgMusic.addEventListener('ended', () => {
+  nextTrack();
+  bgMusic.play().catch(() => {});
+});
+
+// Load first track
+loadTrack(0);
 </script>
 </body>
 </html>
