@@ -483,6 +483,137 @@
       .countdown-num { font-size: 28px; min-width: 40px; }
       .food-grid { grid-template-columns: repeat(2, 1fr); }
     }
+
+    /* ===== Confetti ===== */
+    .confetti-piece {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      z-index: 1000;
+      pointer-events: none;
+      animation: confetti-fall 3s ease-out forwards;
+    }
+    @keyframes confetti-fall {
+      0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg) scale(0); opacity: 0; }
+    }
+
+    /* ===== Lucky wheel ===== */
+    .wheel-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 20px 0;
+    }
+    .wheel-wrapper {
+      position: relative;
+      width: 200px;
+      height: 200px;
+    }
+    .wheel {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      border: 4px solid var(--gold);
+      position: relative;
+      transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+      overflow: hidden;
+    }
+    .wheel-segment {
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      left: 50%;
+      top: 50%;
+      transform-origin: 0% 0%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    .wheel-pointer {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 24px;
+      z-index: 10;
+    }
+    .wheel-result {
+      margin-top: 16px;
+      padding: 12px 24px;
+      background: rgba(139,34,82,0.08);
+      border-radius: 20px;
+      font-size: 16px;
+      color: var(--rose-deep);
+      display: none;
+    }
+
+    /* ===== Mood selector ===== */
+    .mood-grid {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 16px 0;
+      flex-wrap: wrap;
+    }
+    .mood-item {
+      font-size: 32px;
+      cursor: pointer;
+      transition: transform 0.2s;
+      padding: 8px;
+      border-radius: 12px;
+    }
+    .mood-item:hover { transform: scale(1.3); }
+    .mood-item.selected {
+      background: rgba(139,34,82,0.1);
+      transform: scale(1.2);
+    }
+
+    /* ===== Rainbow effect ===== */
+    .rainbow {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 998;
+      opacity: 0;
+      background: linear-gradient(45deg,
+        rgba(255,0,0,0.1),
+        rgba(255,127,0,0.1),
+        rgba(255,255,0,0.1),
+        rgba(0,255,0,0.1),
+        rgba(0,0,255,0.1),
+        rgba(75,0,130,0.1),
+        rgba(148,0,211,0.1)
+      );
+      transition: opacity 0.5s;
+    }
+    .rainbow.show { opacity: 1; animation: rainbow-shift 2s ease; }
+    @keyframes rainbow-shift {
+      0%,100% { opacity: 0; }
+      50% { opacity: 1; }
+    }
+
+    /* ===== Easter egg ===== */
+    .title-clicks {
+      cursor: default;
+      user-select: none;
+    }
+
+    /* ===== Fun facts ===== */
+    .fun-fact {
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(201,169,110,0.1), rgba(199,107,138,0.1));
+      border-radius: 16px;
+      margin-top: 16px;
+      font-size: 14px;
+      color: var(--ink);
+      line-height: 1.6;
+    }
+    .fun-fact-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
   </style>
 </head>
 <body>
@@ -498,6 +629,9 @@
   <!-- Bullet screen container -->
   <div class="bullet-container" id="bulletContainer"></div>
 
+  <!-- Rainbow overlay -->
+  <div class="rainbow" id="rainbow"></div>
+
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
@@ -508,7 +642,7 @@
       <div class="fade-up ornament">✦ ✦ ✦</div>
       <div class="fade-up eyebrow">一份来自心底的邀约</div>
       <div class="fade-up">
-        <h1>好久不见<br>一起吃顿饭吧</h1>
+        <h1 class="title-clicks" onclick="titleClick()" id="heroTitle">好久不见<br>一起吃顿饭吧</h1>
       </div>
       <div class="fade-up subtitle">那些说「改天约」的日子<br>今天就是那个「改天」</div>
 
@@ -635,14 +769,53 @@
       <div class="checkin-map">
         <span class="checkin-pin">📍</span>
       </div>
+      <p style="font-size:12px; color:var(--ink-soft); margin-bottom:8px;">今天心情如何？</p>
+      <div class="mood-grid" id="moodGrid">
+        <span class="mood-item" data-mood="😊" onclick="selectMood(this)">😊</span>
+        <span class="mood-item" data-mood="🥳" onclick="selectMood(this)">🥳</span>
+        <span class="mood-item" data-mood="😋" onclick="selectMood(this)">😋</span>
+        <span class="mood-item" data-mood="🥰" onclick="selectMood(this)">🥰</span>
+        <span class="mood-item" data-mood="😎" onclick="selectMood(this)">😎</span>
+      </div>
       <button class="btn btn-gold" id="checkinBtn" onclick="doCheckin()">我到了！打卡签到</button>
       <div class="checkin-result" id="checkinResult"></div>
     </div>
 
+    <!-- ===== LUCKY WHEEL ===== -->
+    <div class="card slide-in" id="wheelSection">
+      <div class="section-tag">幸运转盘</div>
+      <p style="font-size:14px; color:var(--ink-soft); margin-bottom:16px;">谁来决定今晚吃什么？转一下就知道！</p>
+      <div class="wheel-container">
+        <div class="wheel-wrapper">
+          <div class="wheel-pointer">▼</div>
+          <div class="wheel" id="luckyWheel">
+            <div class="wheel-segment" style="background:rgba(255,107,107,0.3); transform:rotate(0deg) skewY(-30deg);">🍖</div>
+            <div class="wheel-segment" style="background:rgba(255,165,0,0.3); transform:rotate(60deg) skewY(-30deg);">🍣</div>
+            <div class="wheel-segment" style="background:rgba(255,215,0,0.3); transform:rotate(120deg) skewY(-30deg);">🍲</div>
+            <div class="wheel-segment" style="background:rgba(144,238,144,0.3); transform:rotate(180deg) skewY(-30deg);">🥗</div>
+            <div class="wheel-segment" style="background:rgba(135,206,250,0.3); transform:rotate(240deg) skewY(-30deg);">🍝</div>
+            <div class="wheel-segment" style="background:rgba(221,160,221,0.3); transform:rotate(300deg) skewY(-30deg);">🦐</div>
+          </div>
+        </div>
+        <button class="btn" style="margin-top:20px;" onclick="spinWheel()">转动转盘</button>
+        <div class="wheel-result" id="wheelResult"></div>
+      </div>
+    </div>
+
+    <!-- ===== FUN FACT ===== -->
+    <div class="card slide-in" id="funFactSection">
+      <div class="section-tag">你知道吗</div>
+      <div class="fun-fact">
+        <div class="fun-fact-icon">💡</div>
+        <div id="funFactText">和朋友一起吃饭可以降低压力荷尔蒙，让快乐荷尔蒙增加 20%！</div>
+      </div>
+    </div>
+
     <!-- ===== FOOTER ===== -->
     <div class="footer">
-      <div class="heart-float" style="font-size:20px; color:var(--gold); margin-bottom:8px;">♡</div>
+      <div class="heart-float" style="font-size:20px; color:var(--gold); margin-bottom:8px; cursor:pointer;" onclick="triggerRainbow()">♡</div>
       <div>期待与你相见</div>
+      <div style="margin-top:12px; font-size:12px; color:var(--rose);">✨ 小彩蛋：点击标题试试 ✨</div>
     </div>
 
   </div>
@@ -741,10 +914,11 @@ function renderGuests() {
   empty.style.display = 'none';
   list.innerHTML = guests.map(g => {
     const initial = g.name.charAt(0);
+    const mood = g.mood || '';
     return `<div class="guest-item">
       <div class="guest-avatar">${initial}</div>
       <div class="guest-info">
-        <div class="guest-name">${esc(g.name)}</div>
+        <div class="guest-name">${esc(g.name)} ${mood}</div>
         <div class="guest-meta">${g.count}人 · ${esc(g.contact)}${g.msg ? ' · ' + esc(g.msg) : ''}</div>
       </div>
       <span class="guest-status status-yes">确认</span>
@@ -813,7 +987,7 @@ function doCheckin() {
   const result = document.getElementById('checkinResult');
   result.style.display = 'block';
   result.innerHTML = `<div style="font-size:32px; margin-bottom:8px;">🎊</div>
-    <div><strong>${esc(name)}</strong> 已到场</div>
+    <div><strong>${esc(name)}</strong> 已到场 ${selectedMood}</div>
     <div style="font-size:12px; color:var(--ink-soft); margin-top:4px;">${now.toLocaleString('zh-CN')}</div>
     <div style="margin-top:8px; font-size:13px;">今日到场 <strong>${db.checkins.length}</strong> 人</div>`;
   document.getElementById('checkinBtn').disabled = true;
@@ -858,6 +1032,120 @@ function esc(s) {
   d.textContent = s;
   return d.innerHTML;
 }
+
+// ===== Confetti =====
+function fireConfetti() {
+  const colors = ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#C76B8A', '#C9A96E'];
+  for (let i = 0; i < 50; i++) {
+    setTimeout(() => {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = Math.random() * 100 + 'vw';
+      piece.style.top = '-10px';
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+      piece.style.animationDuration = (2 + Math.random() * 2) + 's';
+      document.body.appendChild(piece);
+      setTimeout(() => piece.remove(), 4000);
+    }, i * 30);
+  }
+}
+
+// ===== Easter egg - title clicks =====
+let titleClickCount = 0;
+let titleClickTimer = null;
+function titleClick() {
+  titleClickCount++;
+  clearTimeout(titleClickTimer);
+  titleClickTimer = setTimeout(() => { titleClickCount = 0; }, 2000);
+  if (titleClickCount >= 5) {
+    titleClickCount = 0;
+    triggerRainbow();
+    fireConfetti();
+    showToast('🎉 发现彩蛋！祝你今天开心！');
+    // Spawn extra petals
+    for (let i = 0; i < 12; i++) {
+      setTimeout(() => {
+        const petal = document.createElement('div');
+        petal.style.cssText = `position:fixed; top:-20px; left:${Math.random()*100}vw; pointer-events:none; z-index:101; font-size:${20+Math.random()*20}px; animation: fall ${5+Math.random()*3}s linear forwards;`;
+        petal.textContent = ['🌸', '💕', '✨', '🌹', '💖', '🍀'][Math.floor(Math.random()*6)];
+        document.body.appendChild(petal);
+        setTimeout(() => petal.remove(), 8000);
+      }, i * 100);
+    }
+  }
+}
+
+// ===== Rainbow =====
+function triggerRainbow() {
+  const r = document.getElementById('rainbow');
+  r.classList.add('show');
+  setTimeout(() => r.classList.remove('show'), 2500);
+}
+
+// ===== Mood selector =====
+let selectedMood = '😊';
+function selectMood(el) {
+  document.querySelectorAll('.mood-item').forEach(m => m.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedMood = el.dataset.mood;
+}
+
+// ===== Lucky wheel =====
+const wheelFoods = ['🍖 烤肉', '🍣 日料', '🍲 火锅', '🥗 轻食', '🍝 意面', '🦐 海鲜'];
+let isSpinning = false;
+function spinWheel() {
+  if (isSpinning) return;
+  isSpinning = true;
+  const wheel = document.getElementById('luckyWheel');
+  const result = document.getElementById('wheelResult');
+  result.style.display = 'none';
+  const spins = 5 + Math.floor(Math.random() * 3);
+  const extraDeg = Math.floor(Math.random() * 360);
+  wheel.style.transform = `rotate(${spins * 360 + extraDeg}deg)`;
+  setTimeout(() => {
+    const idx = Math.floor(((360 - (extraDeg % 360)) / 60)) % 6;
+    result.textContent = `✨ 今晚吃 ${wheelFoods[idx]}！`;
+    result.style.display = 'block';
+    isSpinning = false;
+    fireConfetti();
+  }, 4200);
+}
+
+// ===== Fun facts =====
+const funFacts = [
+  '和朋友一起吃饭可以降低压力荷尔蒙，让快乐荷尔蒙增加 20%！',
+  '研究表明，经常与朋友聚餐的人幸福感更高，寿命也更长。',
+  '人类天生需要社交，一起进餐是最古老的社交方式之一。',
+  '笑一顿饭的功夫可以燃烧约 40 卡路里，相当于散步 10 分钟！',
+  '共享美食时，大脑会释放催产素，让彼此关系更亲密。',
+  '一顿愉快的晚餐可以改善睡眠质量，让你第二天精神更好。'
+];
+document.getElementById('funFactText').textContent =
+  funFacts[Math.floor(Math.random() * funFacts.length)];
+
+// ===== Update RSVP confetti =====
+const origSubmit = submitRSVP;
+submitRSVP = function() {
+  const name = document.getElementById('guestName').value.trim();
+  const count = document.getElementById('guestCount').value;
+  const contact = document.getElementById('guestContact').value.trim();
+  const msg = document.getElementById('guestMsg').value.trim();
+  if (!name) { showToast('请填写你的名字'); return; }
+  if (!contact) { showToast('请填写联系方式'); return; }
+  const db = loadDB();
+  const existing = db.guests.findIndex(g => g.name === name);
+  const entry = { name, count: Number(count), contact, msg, mood: selectedMood, time: new Date().toLocaleString('zh-CN') };
+  if (existing >= 0) db.guests[existing] = entry;
+  else db.guests.push(entry);
+  saveDB(db);
+  document.getElementById('rsvpForm').style.display = 'none';
+  document.getElementById('rsvpDone').style.display = 'block';
+  renderGuests();
+  showToast('报名成功！期待与你相见');
+  fireConfetti();
+};
 </script>
 </body>
 </html>
