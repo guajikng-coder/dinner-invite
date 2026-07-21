@@ -523,9 +523,11 @@
         width: auto;
         max-width: 400px;
         max-height: 70vh;
+        overflow-y: auto;
       }
       .music-toggle { width: 48px; height: 48px; font-size: 20px; }
-      .netease-embed iframe { height: 350px !important; }
+      .quick-songs { gap: 6px; }
+      .quick-song { padding: 5px 10px; font-size: 11px; }
       
       /* Better touch targets */
       .music-btn { padding: 8px; min-width: 44px; min-height: 44px; }
@@ -896,14 +898,68 @@
       50% { opacity: 0.5; }
     }
 
-    /* ===== NetEase embed ===== */
-    .netease-embed {
+    /* ===== NetEase player ===== */
+    .netease-player-wrap {
       border-radius: 12px;
       overflow: hidden;
-      background: rgba(0,0,0,0.05);
+      background: rgba(0,0,0,0.03);
+      margin-bottom: 12px;
     }
-    .netease-embed iframe {
-      display: block;
+
+    /* ===== Music search ===== */
+    .music-search-box {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .music-search-input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid var(--rose-light);
+      border-radius: 20px;
+      font-size: 13px;
+      background: rgba(255,255,255,0.6);
+      color: var(--ink);
+      outline: none;
+      font-family: inherit;
+    }
+    .music-search-input:focus {
+      border-color: var(--gold);
+    }
+    .music-search-btn {
+      width: 38px;
+      height: 38px;
+      border: none;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--rose-deep), var(--rose));
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .music-search-btn:hover {
+      transform: scale(1.05);
+    }
+
+    /* ===== Quick songs ===== */
+    .quick-songs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .quick-song {
+      padding: 6px 12px;
+      background: rgba(139,34,82,0.06);
+      border-radius: 16px;
+      font-size: 12px;
+      color: var(--ink);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .quick-song:hover {
+      background: rgba(139,34,82,0.12);
+      color: var(--rose-deep);
     }
     .music-playlist-item {
       display: flex;
@@ -968,12 +1024,29 @@
     <div class="music-panel" id="musicPanel">
       <div class="music-title">🎵 在线音乐</div>
       
-      <!-- NetEase Official Embed with Search -->
-      <div class="netease-embed">
+      <!-- Search -->
+      <div class="music-search-box">
+        <input class="music-search-input" id="musicSearchInput" placeholder="搜索歌曲、歌手..." 
+          onkeydown="if(event.key==='Enter')searchAndPlay()">
+        <button class="music-search-btn" onclick="searchAndPlay()">🔍</button>
+      </div>
+      
+      <!-- Player -->
+      <div class="netease-player-wrap">
         <iframe id="musicFrame"
-          src="https://music.163.com/outchain/player?type=0&id=2829883282&auto=0&height=430"
+          src="https://music.163.com/outchain/player?type=2&id=1901371647&auto=0&height=66"
           frameborder="0" allowfullscreen="true" allow="autoplay; encrypted-media"
-          style="width:100%;height:430px;border-radius:12px;border:none;"></iframe>
+          style="width:100%;height:66px;border:none;"></iframe>
+      </div>
+      
+      <!-- Quick songs -->
+      <div class="quick-songs">
+        <div class="quick-song" onclick="playSong(1901371647)">☀️ 晴天</div>
+        <div class="quick-song" onclick="playSong(1974443814)">🍃 起风了</div>
+        <div class="quick-song" onclick="playSong(5242914520)">🌙 夜曲</div>
+        <div class="quick-song" onclick="playSong(28756172)">🍀 小幸运</div>
+        <div class="quick-song" onclick="playSong(1457484025)">✨ 光年之外</div>
+        <div class="quick-song" onclick="playSong(33451932)">🎈 告白气球</div>
       </div>
     </div>
     <button class="music-toggle" id="musicToggle" onclick="toggleMusicPanel()">🎵</button>
@@ -1494,9 +1567,25 @@ submitRSVP = function() {
 // ===== Music Player (NetEase Cloud Music) =====
 const musicPanel = document.getElementById('musicPanel');
 const musicToggle = document.getElementById('musicToggle');
+const musicFrame = document.getElementById('musicFrame');
 
 function toggleMusicPanel() {
   musicPanel.classList.toggle('show');
+}
+
+function playSong(id) {
+  musicFrame.src = `https://music.163.com/outchain/player?type=2&id=${id}&auto=1&height=66`;
+}
+
+function searchAndPlay() {
+  const input = document.getElementById('musicSearchInput');
+  const query = input.value.trim();
+  if (!query) return;
+  
+  // 打开网易云搜索页面
+  window.open(`https://music.163.com/#search/m/?s=${encodeURIComponent(query)}&type=1`, '_blank');
+  showToast('正在跳转到网易云搜索...');
+  input.value = '';
 }
 </script>
 </body>
