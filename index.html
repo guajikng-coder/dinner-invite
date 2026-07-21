@@ -251,26 +251,127 @@
       border-color: var(--rose-light);
     }
 
-    /* ===== Wishes Board ===== */
+    /* ===== Wishes Board (Blind Box) ===== */
     .wishes-board {
       width: 100%;
-      max-height: 200px;
+      max-height: 220px;
       overflow-y: auto;
-      text-align: left;
+      text-align: center;
       margin-bottom: 12px;
+      padding: 4px;
     }
 
-    .wish-item {
-      padding: 10px 12px;
-      background: rgba(255,255,255,0.6);
-      border-radius: 10px;
-      margin-bottom: 8px;
-      border-left: 3px solid var(--rose);
+    .blind-box-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      width: 100%;
     }
 
-    .wish-author { font-size: 11px; font-weight: 600; color: var(--rose-deep); margin-bottom: 2px; }
-    .wish-text { font-size: 12px; color: var(--ink); line-height: 1.4; }
-    .wish-time { font-size: 10px; color: var(--ink-soft); margin-top: 3px; }
+    .blind-box {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      perspective: 500px;
+    }
+
+    .blind-box-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+
+    .blind-box.opened .blind-box-inner {
+      transform: rotateY(180deg);
+    }
+
+    .blind-box-front, .blind-box-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .blind-box-front {
+      background: linear-gradient(135deg, var(--rose-light) 0%, var(--gold-light) 100%);
+      border: 2px solid var(--rose);
+      box-shadow: 0 4px 15px rgba(139,34,82,0.2);
+    }
+
+    .blind-box-front:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(139,34,82,0.3);
+    }
+
+    .blind-box-front:active {
+      transform: scale(0.98);
+    }
+
+    .blind-box-icon {
+      font-size: 28px;
+      margin-bottom: 2px;
+    }
+
+    .blind-box-label {
+      font-size: 10px;
+      color: var(--rose-deep);
+      font-weight: 600;
+    }
+
+    .blind-box-back {
+      background: rgba(255,255,255,0.95);
+      border: 2px solid var(--gold);
+      transform: rotateY(180deg);
+      padding: 10px 8px;
+      text-align: left;
+      overflow: hidden;
+    }
+
+    .blind-box-author {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--rose-deep);
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    .blind-box-text {
+      font-size: 11px;
+      color: var(--ink);
+      line-height: 1.4;
+      word-break: break-all;
+    }
+
+    .blind-box-time {
+      font-size: 9px;
+      color: var(--ink-soft);
+      margin-top: 4px;
+      text-align: center;
+    }
+
+    .blind-box-sparkle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: var(--gold);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: sparkle-burst 0.8s ease-out forwards;
+    }
+
+    @keyframes sparkle-burst {
+      0% { transform: scale(0); opacity: 1; }
+      100% { transform: scale(2); opacity: 0; }
+    }
 
     /* ===== Countdown ===== */
     .countdown-box {
@@ -759,14 +860,16 @@
         </div>
       </div>
 
-      <!-- Page 6: Wishes Board -->
+      <!-- Page 6: Wishes Board (Blind Box) -->
       <div class="page" data-page="5">
-        <div class="page-eyebrow">💌 留言板</div>
+        <div class="page-eyebrow">💌 留言盲盒</div>
+        <p style="font-size:11px; color:var(--ink-soft); margin-bottom:8px;">点击盲盒，拆开朋友们的祝福</p>
         <div class="wishes-board" id="wishesBoard"></div>
-        <div style="width:100%;">
+        <div style="width:100%; border-top: 1px solid var(--rose-light); padding-top:10px;">
+          <p style="font-size:11px; color:var(--ink-soft); margin-bottom:6px;">✨ 写下你的祝福</p>
           <input class="form-input" id="wishName" placeholder="你的名字" maxlength="10" style="margin-bottom:6px;">
-          <textarea class="form-textarea" id="wishContent" placeholder="写下你想说的话..." maxlength="150" style="min-height:45px;"></textarea>
-          <button class="btn" style="margin-top:6px; width:100%;" onclick="postWish()">留下祝福</button>
+          <textarea class="form-textarea" id="wishContent" placeholder="写下你想说的话..." maxlength="150" style="min-height:40px;"></textarea>
+          <button class="btn" style="margin-top:6px; width:100%;" onclick="postWish()">放入盲盒 🎁</button>
         </div>
       </div>
 
@@ -903,22 +1006,67 @@ function viewPhoto(emoji) {
 }
 function closePhotoViewer() { document.getElementById('photoViewer').classList.remove('show'); }
 
-// ===== Wishes Board =====
+// ===== Wishes Board (Blind Box) =====
+const blindBoxIcons = ['🎁', '🎀', '💝', '🎊', '🎈', '✨', '🌟', '💫', '🎉'];
+
 function renderWishes() {
   const db = loadDB();
   const board = document.getElementById('wishesBoard');
+  const openedKey = 'opened_wishes';
+  const opened = JSON.parse(localStorage.getItem(openedKey) || '[]');
+  
   if (!db.wishes || !db.wishes.length) {
     board.innerHTML = '<div style="text-align:center; color:var(--ink-soft); font-size:12px; padding:16px 0;">还没有留言，做第一个吧！</div>';
     return;
   }
-  board.innerHTML = db.wishes.map(w => `
-    <div class="wish-item">
-      <div class="wish-author">${esc(w.name)}</div>
-      <div class="wish-text">${esc(w.text)}</div>
-      <div class="wish-time">${esc(w.time)}</div>
-    </div>
-  `).join('');
-  board.scrollTop = board.scrollHeight;
+  
+  board.innerHTML = '<div class="blind-box-grid">' + db.wishes.map((w, i) => {
+    const isOpened = opened.includes(i);
+    const icon = blindBoxIcons[i % blindBoxIcons.length];
+    return `
+      <div class="blind-box ${isOpened ? 'opened' : ''}" onclick="openBlindBox(${i})">
+        <div class="blind-box-inner">
+          <div class="blind-box-front">
+            <div class="blind-box-icon">${icon}</div>
+            <div class="blind-box-label">点击拆开</div>
+          </div>
+          <div class="blind-box-back">
+            <div class="blind-box-author">${esc(w.name)}</div>
+            <div class="blind-box-text">${esc(w.text)}</div>
+            <div class="blind-box-time">${esc(w.time)}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('') + '</div>';
+}
+
+function openBlindBox(index) {
+  const openedKey = 'opened_wishes';
+  const opened = JSON.parse(localStorage.getItem(openedKey) || '[]');
+  
+  if (opened.includes(index)) return;
+  
+  opened.push(index);
+  localStorage.setItem(openedKey, JSON.stringify(opened));
+  
+  const boxes = document.querySelectorAll('.blind-box');
+  const box = boxes[index];
+  
+  if (box) {
+    box.classList.add('opened');
+    
+    // 创建金色火花
+    const rect = box.getBoundingClientRect();
+    for (let i = 0; i < 8; i++) {
+      const sparkle = document.createElement('div');
+      sparkle.className = 'blind-box-sparkle';
+      sparkle.style.left = (rect.left + rect.width / 2 + (Math.random() - 0.5) * 40) + 'px';
+      sparkle.style.top = (rect.top + rect.height / 2 + (Math.random() - 0.5) * 40) + 'px';
+      document.body.appendChild(sparkle);
+      setTimeout(() => sparkle.remove(), 800);
+    }
+  }
 }
 
 function postWish() {
@@ -932,7 +1080,7 @@ function postWish() {
   document.getElementById('wishName').value = '';
   document.getElementById('wishContent').value = '';
   renderWishes();
-  showToast('留言成功！');
+  showToast('祝福已放入盲盒！🎁');
   fireConfetti();
 }
 
