@@ -3511,7 +3511,6 @@ function saveSignature() {
     const text = document.getElementById('artFontInput').value.trim();
     if (!text) { showToast('请输入签名文字'); return; }
     
-    // 生成艺术字图片
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = 200;
     tempCanvas.height = 60;
@@ -3531,22 +3530,24 @@ function saveSignature() {
     signatureData = tempCanvas.toDataURL('image/png');
   }
   
+  // 保存到本地
+  const db = loadDB();
+  if (!db.signatures) db.signatures = [];
+  db.signatures.push({
+    name: name,
+    data: signatureData,
+    time: new Date().toLocaleString('zh-CN')
+  });
+  saveDB(db);
+  
+  // 同时保存到 API
   if (useAPI) {
-    apiPost('/signatures', { name, data: signatureData }).then(() => renderSignatures());
-  } else {
-    const db = loadDB();
-    if (!db.signatures) db.signatures = [];
-    db.signatures.push({
-      name: name,
-      data: signatureData,
-      time: new Date().toLocaleString('zh-CN')
-    });
-    saveDB(db);
-    renderSignatures();
+    apiPost('/signatures', { name, data: signatureData });
   }
   
   clearSignature();
   document.getElementById('signerName').value = '';
+  renderSignatures();
   showToast('签名成功！✍️');
   fireConfetti();
 }
