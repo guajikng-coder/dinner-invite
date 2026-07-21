@@ -739,33 +739,71 @@
 
     .archive-audio {
       grid-column: span 3;
-      padding: 10px;
-      background: rgba(255,255,255,0.5);
-      border-radius: 8px;
-      border-left: 3px solid var(--rose);
+      padding: 12px;
+      background: linear-gradient(135deg, rgba(199,107,138,0.08) 0%, rgba(201,169,110,0.08) 100%);
+      border-radius: 12px;
+      border: 1px solid var(--rose-light);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      position: relative;
     }
 
     .archive-audio-icon {
-      font-size: 20px;
+      font-size: 24px;
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--rose-light), var(--gold-light));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
     }
 
     .archive-audio audio {
       flex: 1;
-      height: 32px;
+      height: 36px;
+      border-radius: 8px;
+    }
+
+    .archive-audio-tag {
+      position: absolute;
+      top: 6px;
+      right: 36px;
+      font-size: 9px;
+      padding: 2px 6px;
+      background: rgba(255,255,255,0.7);
+      border-radius: 4px;
+      color: var(--ink-soft);
     }
 
     .archive-audio-delete {
-      width: 18px;
-      height: 18px;
-      background: rgba(139,34,82,0.7);
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 20px;
+      height: 20px;
+      background: rgba(139,34,82,0.6);
       border: none;
       border-radius: 50%;
       color: white;
-      font-size: 10px;
+      font-size: 12px;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.6;
+      transition: all 0.2s;
+    }
+
+    .archive-audio:hover .archive-audio-delete {
+      opacity: 1;
+    }
+
+    .archive-audio-delete:hover {
+      background: var(--rose-deep);
+      transform: scale(1.1);
     }
 
     /* ===== Archive Actions ===== */
@@ -823,6 +861,10 @@
     .note-input-area {
       width: 100%;
       margin-top: 6px;
+      padding: 8px;
+      background: rgba(255,255,255,0.5);
+      border-radius: 10px;
+      border: 1px dashed var(--rose-light);
     }
 
     /* ===== Form ===== */
@@ -1312,20 +1354,23 @@
           <div class="archive-upload-btn" onclick="startRecording()" id="recordBtn">
             🎤 录音
           </div>
-          <div class="archive-upload-btn" onclick="document.getElementById('noteInput').focus()">
+          <div class="archive-upload-btn" onclick="showNoteInput()">
             📝 笔记
           </div>
         </div>
         
-        <!-- Note Input (Hidden by default) -->
-        <div class="note-input-area" id="noteInputArea" style="display:none;">
+        <!-- Note Input -->
+        <div class="note-input-area" id="noteInputArea">
           <select class="form-select" id="noteCategory" style="margin-bottom:4px;">
             <option value="daily">日常</option>
             <option value="travel">旅行</option>
             <option value="party">聚会</option>
           </select>
           <textarea class="form-textarea" id="noteInput" placeholder="写下这一刻..." style="min-height:40px;"></textarea>
-          <button class="btn" style="width:100%; margin-top:4px;" onclick="saveNote()">保存笔记</button>
+          <div style="display:flex; gap:6px; margin-top:4px;">
+            <button class="btn" style="flex:1;" onclick="saveNote()">保存</button>
+            <button class="btn" style="flex:1; background:var(--ink-soft);" onclick="hideNoteInput()">取消</button>
+          </div>
         </div>
         
         <!-- Recording Indicator -->
@@ -1927,9 +1972,9 @@ function renderArchive() {
     } else if (item.type === 'audio') {
       return `
         <div class="archive-audio">
-          <span class="archive-audio-icon">🎤</span>
+          <div class="archive-audio-icon">🎤</div>
           <audio controls src="${item.data}"></audio>
-          <span class="archive-tag">${getFolderTag(item.category)}</span>
+          <span class="archive-audio-tag">${getFolderTag(item.category)}</span>
           <button class="archive-audio-delete" onclick="deleteArchiveItem(${actualIndex})">×</button>
         </div>
       `;
@@ -2071,15 +2116,20 @@ function saveNote() {
   saveDB(db);
   
   document.getElementById('noteInput').value = '';
-  document.getElementById('noteInputArea').style.display = 'none';
+  hideNoteInput();
   renderArchive();
   showToast('笔记已保存！');
 }
 
-// Toggle note input
-document.getElementById('noteInput')?.addEventListener('focus', () => {
+function showNoteInput() {
   document.getElementById('noteInputArea').style.display = 'block';
-});
+  document.getElementById('noteInput').focus();
+}
+
+function hideNoteInput() {
+  document.getElementById('noteInputArea').style.display = 'none';
+  document.getElementById('noteInput').value = '';
+}
 
 // ===== Confetti =====
 function fireConfetti() {
