@@ -2393,7 +2393,10 @@ let useAPI = false;
 // Check if backend is available
 async function checkAPI() {
   try {
-    const res = await fetch(API_BASE + '/health', { signal: AbortSignal.timeout(5000) });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000);
+    const res = await fetch(API_BASE + '/health', { signal: controller.signal });
+    clearTimeout(timeoutId);
     if (res.ok) {
       useAPI = true;
       console.log('✅ 已连接后端服务器');
@@ -3666,8 +3669,16 @@ function importData(event) {
 
 // ===== Init =====
 async function init() {
-  // Check for backend API
-  await checkAPI();
+  try {
+    // Check for backend API (with timeout)
+    await Promise.race([
+      checkAPI(),
+      new Promise((_, reject) => setTimeout(() => reject('timeout'), 3000))
+    ]);
+  } catch (e) {
+    console.log('API check skipped:', e);
+    useAPI = false;
+  }
   
   // Render all sections
   renderWishes();
@@ -3685,7 +3696,12 @@ async function init() {
   }
 }
 
-init();
+// Make sure init runs after DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
 </script>
 </body>
 </html>
