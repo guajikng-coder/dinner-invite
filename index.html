@@ -1603,6 +1603,206 @@
     .ceremony-title { margin-top: 45px; color: var(--gold); font-size: 14px; letter-spacing: 4px; animation: title-pulse 2s ease-in-out infinite; }
     @keyframes title-pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
     .ceremony-hint { margin-top: 10px; color: var(--rose-light); font-size: 11px; opacity: 0.7; }
+    
+    /* ===== Ceremony Signature ===== */
+    .ceremony-signature {
+      margin-top: 20px;
+      width: 280px;
+    }
+    
+    .ceremony-signature-canvas-wrap {
+      position: relative;
+      width: 100%;
+      height: 70px;
+      border: 1px dashed rgba(255,255,255,0.3);
+      border-radius: 10px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.08);
+      margin-bottom: 8px;
+    }
+    
+    .ceremony-signature-controls {
+      display: flex;
+      gap: 6px;
+    }
+    
+    .ceremony-signature-input {
+      flex: 1;
+      padding: 6px 10px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 6px;
+      font-size: 11px;
+      font-family: inherit;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      outline: none;
+    }
+    
+    .ceremony-signature-input::placeholder {
+      color: rgba(255,255,255,0.4);
+    }
+    
+    .ceremony-signature-btn {
+      padding: 6px 12px;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 6px;
+      font-size: 11px;
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .ceremony-signature-btn:hover {
+      background: rgba(255,255,255,0.25);
+    }
+    
+    .ceremony-signatures {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      margin-top: 10px;
+      max-height: 80px;
+      overflow-y: auto;
+    }
+    
+    .ceremony-signature-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 4px 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.15);
+      position: relative;
+    }
+    
+    .ceremony-signature-item img {
+      height: 28px;
+      max-width: 70px;
+      object-fit: contain;
+    }
+    
+    .ceremony-signature-item-name {
+      font-size: 9px;
+      color: rgba(255,255,255,0.6);
+      margin-top: 2px;
+    }
+    
+    .ceremony-signature-delete {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      width: 14px;
+      height: 14px;
+      background: #f44336;
+      border: none;
+      border-radius: 50%;
+      color: white;
+      font-size: 10px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .ceremony-signature-item:hover .ceremony-signature-delete {
+      display: flex;
+    }
+
+    /* ===== Art Font Signature ===== */
+    .signature-mode-toggle {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .signature-mode-btn {
+      flex: 1;
+      padding: 6px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 6px;
+      color: rgba(255,255,255,0.6);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .signature-mode-btn.active {
+      background: rgba(255,255,255,0.25);
+      border-color: rgba(255,255,255,0.4);
+      color: white;
+    }
+
+    .signature-mode-btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .art-font-input {
+      display: none;
+    }
+
+    .art-font-input.show {
+      display: block;
+    }
+
+    .art-font-preview {
+      width: 100%;
+      padding: 12px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      text-align: center;
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .art-font-text {
+      font-size: 28px;
+      color: #F2D0D9;
+      text-shadow: 0 2px 8px rgba(201,169,110,0.5);
+    }
+
+    .art-font-styles {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .art-font-style {
+      padding: 4px 8px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 6px;
+      font-size: 10px;
+      color: rgba(255,255,255,0.7);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .art-font-style:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .art-font-style.active {
+      background: var(--rose-deep);
+      border-color: var(--rose-deep);
+      color: white;
+    }
+
+    .signature-canvas-wrap {
+      display: none;
+    }
+
+    .signature-canvas-wrap.show {
+      display: block;
+    }
     .sparkle {
       position: absolute; width: 4px; height: 4px; background: var(--gold);
       border-radius: 50%; pointer-events: none; animation: sparkle 1.5s ease-out forwards;
@@ -1673,6 +1873,49 @@
     </div>
     <div class="ceremony-title">不 说 再 见</div>
     <div class="ceremony-hint">点击火漆印章打开</div>
+    
+    <!-- Signature Wall on Ceremony -->
+    <div class="ceremony-signature">
+      <div class="signature-title" style="color:var(--rose-light);">✍️ 签名墙</div>
+      
+      <!-- Mode Toggle -->
+      <div class="signature-mode-toggle">
+        <div class="signature-mode-btn active" onclick="switchSignatureMode('draw')">🖊️ 手写</div>
+        <div class="signature-mode-btn" onclick="switchSignatureMode('text')">✨ 艺术字</div>
+      </div>
+      
+      <!-- Draw Mode -->
+      <div class="ceremony-signature-canvas-wrap show" id="drawMode">
+        <canvas id="signatureCanvas" class="signature-canvas"></canvas>
+        <div class="signature-overlay" id="signatureOverlay">
+          <span style="color:var(--rose-light);">点击此处签名 ✍️</span>
+        </div>
+      </div>
+      
+      <!-- Text Mode -->
+      <div class="art-font-input" id="textMode">
+        <input class="ceremony-signature-input" id="artFontInput" placeholder="输入你的名字" maxlength="10" style="width:100%; margin-bottom:8px;">
+        <div class="art-font-styles" id="artFontStyles">
+          <div class="art-font-style active" onclick="selectArtFont(0, this)">宋体</div>
+          <div class="art-font-style" onclick="selectArtFont(1, this)">楷体</div>
+          <div class="art-font-style" onclick="selectArtFont(2, this)">行书</div>
+          <div class="art-font-style" onclick="selectArtFont(3, this)">草书</div>
+          <div class="art-font-style" onclick="selectArtFont(4, this)">手写</div>
+          <div class="art-font-style" onclick="selectArtFont(5, this)">可爱</div>
+        </div>
+        <div class="art-font-preview">
+          <div class="art-font-text" id="artFontPreview">预览</div>
+        </div>
+      </div>
+      
+      <!-- Controls -->
+      <div class="ceremony-signature-controls">
+        <input class="ceremony-signature-input" id="signerName" placeholder="你的名字" maxlength="8">
+        <button class="ceremony-signature-btn" onclick="saveSignature()">签名 ✓</button>
+        <button class="ceremony-signature-btn" onclick="clearSignature()">清除</button>
+      </div>
+      <div class="ceremony-signatures" id="coverSignatures"></div>
+    </div>
   </div>
 
   <!-- Flipbook -->
@@ -2933,6 +3176,45 @@ function resetTimeScroll() {
 let signatureCanvas, signatureCtx;
 let isDrawing = false;
 let hasDrawn = false;
+let signatureMode = 'draw';
+let selectedArtFont = 0;
+let artFontText = '';
+
+const artFontStyles = [
+  { name: '宋体', family: '"SimSun", "宋体", serif', color: '#F2D0D9' },
+  { name: '楷体', family: '"KaiTi", "楷体", serif', color: '#E8D5B0' },
+  { name: '行书', family: '"STXingkai", "华文行楷", cursive', color: '#C9A96E' },
+  { name: '草书', family: '"STCaiyun", "华文彩云", cursive', color: '#C76B8A' },
+  { name: '手写', family: '"STLiti", "华文隶书", cursive', color: '#F2D0D9' },
+  { name: '可爱', family: '"Comic Sans MS", "cursive", sans-serif', color: '#FFB6C1' },
+];
+
+function switchSignatureMode(mode) {
+  signatureMode = mode;
+  document.querySelectorAll('.signature-mode-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', (mode === 'draw' && i === 0) || (mode === 'text' && i === 1));
+  });
+  document.getElementById('drawMode').classList.toggle('show', mode === 'draw');
+  document.getElementById('textMode').classList.toggle('show', mode === 'text');
+}
+
+function selectArtFont(index, el) {
+  selectedArtFont = index;
+  document.querySelectorAll('.art-font-style').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  updateArtFontPreview();
+}
+
+function updateArtFontPreview() {
+  const input = document.getElementById('artFontInput');
+  const preview = document.getElementById('artFontPreview');
+  const text = input ? input.value.trim() : '';
+  const style = artFontStyles[selectedArtFont];
+  preview.textContent = text || '预览';
+  preview.style.fontFamily = style.family;
+  preview.style.color = style.color;
+  artFontText = text;
+}
 
 function initSignature() {
   signatureCanvas = document.getElementById('signatureCanvas');
@@ -2943,18 +3225,16 @@ function initSignature() {
   signatureCanvas.height = rect.height;
   signatureCtx = signatureCanvas.getContext('2d');
   
-  signatureCtx.strokeStyle = '#8B2252';
+  signatureCtx.strokeStyle = '#F2D0D9';
   signatureCtx.lineWidth = 2;
   signatureCtx.lineCap = 'round';
   signatureCtx.lineJoin = 'round';
   
-  // Mouse events
   signatureCanvas.addEventListener('mousedown', startDraw);
   signatureCanvas.addEventListener('mousemove', draw);
   signatureCanvas.addEventListener('mouseup', stopDraw);
   signatureCanvas.addEventListener('mouseleave', stopDraw);
   
-  // Touch events
   signatureCanvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
     startDraw(e.touches[0]);
@@ -2964,6 +3244,12 @@ function initSignature() {
     draw(e.touches[0]);
   });
   signatureCanvas.addEventListener('touchend', stopDraw);
+  
+  // Art font input listener
+  const artInput = document.getElementById('artFontInput');
+  if (artInput) {
+    artInput.addEventListener('input', updateArtFontPreview);
+  }
   
   renderSignatures();
 }
@@ -2997,22 +3283,55 @@ function stopDraw() {
 }
 
 function clearSignature() {
-  if (!signatureCtx) return;
-  signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+  if (signatureMode === 'draw' && signatureCtx) {
+    signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+    hasDrawn = false;
+    document.getElementById('signatureOverlay').classList.remove('hidden');
+  }
+  const artInput = document.getElementById('artFontInput');
+  if (artInput) artInput.value = '';
+  updateArtFontPreview();
   hasDrawn = false;
-  document.getElementById('signatureOverlay').classList.remove('hidden');
 }
 
 function saveSignature() {
-  if (!hasDrawn) { showToast('请先签名'); return; }
   const name = document.getElementById('signerName').value.trim();
   if (!name) { showToast('请输入你的名字'); return; }
+  
+  let signatureData;
+  
+  if (signatureMode === 'draw') {
+    if (!hasDrawn) { showToast('请先签名'); return; }
+    signatureData = signatureCanvas.toDataURL('image/png');
+  } else {
+    const text = document.getElementById('artFontInput').value.trim();
+    if (!text) { showToast('请输入签名文字'); return; }
+    
+    // 生成艺术字图片
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = 200;
+    tempCanvas.height = 60;
+    const tempCtx = tempCanvas.getContext('2d');
+    const style = artFontStyles[selectedArtFont];
+    
+    tempCtx.fillStyle = 'transparent';
+    tempCtx.fillRect(0, 0, 200, 60);
+    tempCtx.font = `28px ${style.family}`;
+    tempCtx.fillStyle = style.color;
+    tempCtx.textAlign = 'center';
+    tempCtx.textBaseline = 'middle';
+    tempCtx.shadowColor = 'rgba(201,169,110,0.5)';
+    tempCtx.shadowBlur = 8;
+    tempCtx.fillText(text, 100, 30);
+    
+    signatureData = tempCanvas.toDataURL('image/png');
+  }
   
   const db = loadDB();
   if (!db.signatures) db.signatures = [];
   db.signatures.push({
     name: name,
-    data: signatureCanvas.toDataURL('image/png'),
+    data: signatureData,
     time: new Date().toLocaleString('zh-CN')
   });
   saveDB(db);
@@ -3022,6 +3341,16 @@ function saveSignature() {
   renderSignatures();
   showToast('签名成功！✍️');
   fireConfetti();
+}
+
+function deleteSignature(index) {
+  if (!confirm('确定要删除这个签名吗？')) return;
+  const db = loadDB();
+  if (!db.signatures) db.signatures = [];
+  db.signatures.splice(index, 1);
+  saveDB(db);
+  renderSignatures();
+  showToast('签名已删除');
 }
 
 function renderSignatures() {
@@ -3034,10 +3363,11 @@ function renderSignatures() {
     return;
   }
   
-  container.innerHTML = signatures.slice(-10).map(s => `
-    <div class="signature-item">
+  container.innerHTML = signatures.map((s, i) => `
+    <div class="ceremony-signature-item">
+      <button class="ceremony-signature-delete" onclick="deleteSignature(${i})">×</button>
       <img src="${s.data}" alt="${s.name}">
-      <div class="signature-item-name">${esc(s.name)}</div>
+      <div class="ceremony-signature-item-name">${esc(s.name)}</div>
     </div>
   `).join('');
 }
