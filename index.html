@@ -443,6 +443,172 @@
       margin-top: 6px;
     }
 
+    /* ===== Time Capsule ===== */
+    .capsule-list {
+      width: 100%;
+      max-height: 180px;
+      overflow-y: auto;
+      margin-bottom: 8px;
+    }
+
+    .capsule-item {
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.5);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      border-left: 3px solid var(--gold);
+      position: relative;
+    }
+
+    .capsule-item.sealed {
+      border-left-color: var(--rose);
+    }
+
+    .capsule-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .capsule-author {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--rose-deep);
+    }
+
+    .capsule-status {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .capsule-status.locked {
+      background: rgba(255,152,0,0.15);
+      color: #e65100;
+    }
+
+    .capsule-status.opened {
+      background: rgba(76,175,80,0.15);
+      color: #2e7d32;
+    }
+
+    .capsule-text {
+      font-size: 12px;
+      color: var(--ink);
+      line-height: 1.4;
+    }
+
+    .capsule-date {
+      font-size: 10px;
+      color: var(--ink-soft);
+      margin-top: 4px;
+    }
+
+    .capsule-countdown {
+      font-size: 11px;
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    .capsule-delete {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 18px;
+      height: 18px;
+      background: rgba(139,34,82,0.7);
+      border: none;
+      border-radius: 50%;
+      color: white;
+      font-size: 11px;
+      cursor: pointer;
+      display: none;
+    }
+
+    .capsule-item:hover .capsule-delete {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ===== Song Wall ===== */
+    .song-list {
+      width: 100%;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-bottom: 8px;
+    }
+
+    .song-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      background: rgba(255,255,255,0.5);
+      border-radius: 10px;
+      margin-bottom: 6px;
+      transition: all 0.2s;
+    }
+
+    .song-item:hover {
+      background: rgba(199,107,138,0.1);
+    }
+
+    .song-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .song-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .song-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .song-artist {
+      font-size: 10px;
+      color: var(--ink-soft);
+    }
+
+    .song-link {
+      font-size: 10px;
+      color: var(--rose);
+      text-decoration: none;
+    }
+
+    .song-link:hover {
+      text-decoration: underline;
+    }
+
+    .song-delete {
+      width: 20px;
+      height: 20px;
+      background: rgba(139,34,82,0.7);
+      border: none;
+      border-radius: 50%;
+      color: white;
+      font-size: 11px;
+      cursor: pointer;
+      display: none;
+      flex-shrink: 0;
+    }
+
+    .song-item:hover .song-delete {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     /* ===== Form ===== */
     .form-group { width: 100%; margin-bottom: 10px; text-align: left; }
     .form-label { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--rose); margin-bottom: 4px; display: block; }
@@ -972,8 +1138,40 @@
         </div>
       </div>
 
-      <!-- Page 7: End -->
+      <!-- Page 7: Time Capsule -->
       <div class="page" data-page="6">
+        <div class="page-eyebrow">⏰ 时间胶囊</div>
+        <p style="font-size:11px; color:var(--ink-soft); margin-bottom:8px;">写下给未来的信，到期才能打开</p>
+        
+        <div class="capsule-list" id="capsuleList"></div>
+        
+        <div style="width:100%; border-top: 1px solid var(--rose-light); padding-top:8px; margin-top:8px;">
+          <input class="form-input" id="capsuleName" placeholder="你的名字" maxlength="10" style="margin-bottom:4px;">
+          <textarea class="form-textarea" id="capsuleContent" placeholder="写给未来的信..." maxlength="200" style="min-height:36px;"></textarea>
+          <div style="display:flex; gap:8px; margin-top:4px;">
+            <input type="date" id="capsuleDate" class="form-input" style="flex:1;">
+            <button class="btn" onclick="createCapsule()" style="white-space:nowrap;">封存 📦</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Page 8: Song Wall -->
+      <div class="page" data-page="7">
+        <div class="page-eyebrow">🎵 歌曲墙</div>
+        <p style="font-size:11px; color:var(--ink-soft); margin-bottom:6px;">每人一首代表友谊的歌</p>
+        
+        <div class="song-list" id="songList"></div>
+        
+        <div style="width:100%; border-top: 1px solid var(--rose-light); padding-top:8px; margin-top:8px;">
+          <input class="form-input" id="songName" placeholder="歌曲名" maxlength="30" style="margin-bottom:4px;">
+          <input class="form-input" id="songArtist" placeholder="歌手" maxlength="20" style="margin-bottom:4px;">
+          <input class="form-input" id="songLink" placeholder="链接（选填）" style="margin-bottom:4px;">
+          <button class="btn" style="width:100%;" onclick="addSong()">添加歌曲 🎶</button>
+        </div>
+      </div>
+
+      <!-- Page 9: End -->
+      <div class="page" data-page="8">
         <div style="font-size:48px; margin-bottom:12px;">💝</div>
         <h1>友谊长存</h1>
         <div class="page-divider"></div>
@@ -1006,7 +1204,7 @@
 <script>
 // ===== Flipbook =====
 let currentPage = 0;
-const totalPages = 7;
+const totalPages = 9;
 const pages = document.querySelectorAll('.page');
 const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
@@ -1073,7 +1271,12 @@ function defaultDB() {
       { name: '小美', text: '虽然要分开了，但我们的友谊不会变！', time: '昨天' },
       { name: '阿杰', text: '期待下次相聚的那天！', time: '2小时前' },
     ],
-    photos: []
+    photos: [],
+    capsules: [],
+    songs: [
+      { name: '朋友', artist: '周华健', link: '' },
+      { name: '一路生花', artist: '温奕心', link: '' },
+    ]
   };
 }
 
@@ -1229,6 +1432,133 @@ function postWish() {
   renderWishes();
   showToast('祝福已放入盲盒！🎁');
   fireConfetti();
+}
+
+// ===== Time Capsule =====
+function renderCapsules() {
+  const db = loadDB();
+  const list = document.getElementById('capsuleList');
+  const capsules = db.capsules || [];
+  
+  if (!capsules.length) {
+    list.innerHTML = '<div style="text-align:center; color:var(--ink-soft); font-size:12px; padding:12px 0;">还没有时间胶囊，封存一个吧！</div>';
+    return;
+  }
+  
+  const now = new Date();
+  list.innerHTML = capsules.map((c, i) => {
+    const openDate = new Date(c.openDate);
+    const isReady = now >= openDate;
+    const diff = openDate - now;
+    const days = Math.max(0, Math.ceil(diff / 86400000));
+    
+    return `
+      <div class="capsule-item ${isReady ? '' : 'sealed'}">
+        <button class="capsule-delete" onclick="event.stopPropagation(); deleteCapsule(${i})">×</button>
+        <div class="capsule-header">
+          <span class="capsule-author">${esc(c.name)}</span>
+          <span class="capsule-status ${isReady ? 'opened' : 'locked'}">${isReady ? '✅ 可打开' : '🔒 封存中'}</span>
+        </div>
+        ${isReady ? 
+          `<div class="capsule-text">${esc(c.text)}</div>` : 
+          `<div class="capsule-countdown">⏳ 还有 ${days} 天可打开</div>`
+        }
+        <div class="capsule-date">封存于 ${esc(c.createDate)} · 开放于 ${esc(c.openDate)}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function createCapsule() {
+  const name = document.getElementById('capsuleName').value.trim();
+  const text = document.getElementById('capsuleContent').value.trim();
+  const openDate = document.getElementById('capsuleDate').value;
+  
+  if (!name || !text) { showToast('请填写名字和内容'); return; }
+  if (!openDate) { showToast('请选择开放日期'); return; }
+  
+  const now = new Date();
+  const open = new Date(openDate);
+  if (open <= now) { showToast('开放日期必须在未来'); return; }
+  
+  const db = loadDB();
+  if (!db.capsules) db.capsules = [];
+  db.capsules.push({
+    name,
+    text,
+    createDate: now.toLocaleDateString('zh-CN'),
+    openDate: openDate
+  });
+  saveDB(db);
+  
+  document.getElementById('capsuleName').value = '';
+  document.getElementById('capsuleContent').value = '';
+  document.getElementById('capsuleDate').value = '';
+  
+  renderCapsules();
+  showToast('时间胶囊已封存！📦');
+  fireConfetti();
+}
+
+function deleteCapsule(index) {
+  if (!confirm('确定要删除这个时间胶囊吗？')) return;
+  const db = loadDB();
+  db.capsules.splice(index, 1);
+  saveDB(db);
+  renderCapsules();
+  showToast('时间胶囊已删除');
+}
+
+// ===== Song Wall =====
+function renderSongs() {
+  const db = loadDB();
+  const list = document.getElementById('songList');
+  const songs = db.songs || [];
+  
+  if (!songs.length) {
+    list.innerHTML = '<div style="text-align:center; color:var(--ink-soft); font-size:12px; padding:12px 0;">还没有歌曲，添加一首吧！</div>';
+    return;
+  }
+  
+  list.innerHTML = songs.map((s, i) => `
+    <div class="song-item">
+      <div class="song-icon">🎵</div>
+      <div class="song-info">
+        <div class="song-name">${esc(s.name)}</div>
+        <div class="song-artist">${esc(s.artist)}${s.link ? ` · <a class="song-link" href="${esc(s.link)}" target="_blank">试听</a>` : ''}</div>
+      </div>
+      <button class="song-delete" onclick="deleteSong(${i})">×</button>
+    </div>
+  `).join('');
+}
+
+function addSong() {
+  const name = document.getElementById('songName').value.trim();
+  const artist = document.getElementById('songArtist').value.trim();
+  const link = document.getElementById('songLink').value.trim();
+  
+  if (!name || !artist) { showToast('请填写歌曲名和歌手'); return; }
+  
+  const db = loadDB();
+  if (!db.songs) db.songs = [];
+  db.songs.push({ name, artist, link });
+  saveDB(db);
+  
+  document.getElementById('songName').value = '';
+  document.getElementById('songArtist').value = '';
+  document.getElementById('songLink').value = '';
+  
+  renderSongs();
+  showToast('歌曲已添加！🎶');
+}
+
+function deleteSong(index) {
+  if (!confirm('确定要删除这首歌吗？')) return;
+  const db = loadDB();
+  db.songs.splice(index, 1);
+  saveDB(db);
+  renderSongs();
+  showToast('歌曲已删除');
 }
 
 // ===== Photo Upload & Pagination =====
@@ -1497,6 +1827,8 @@ function esc(s) { const d = document.createElement('div'); d.textContent = s; re
 
 // ===== Init =====
 renderWishes();
+renderCapsules();
+renderSongs();
 renderPhotoWall();
 createCherryBlossom();
 </script>
