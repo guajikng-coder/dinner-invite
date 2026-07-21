@@ -1844,6 +1844,52 @@
     .signature-canvas-wrap.show {
       display: block;
     }
+
+    /* ===== Data Tools ===== */
+    .data-tools {
+      width: 100%;
+      margin-top: 16px;
+      padding: 12px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 12px;
+      border: 1px solid var(--rose-light);
+    }
+
+    .data-tools-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--rose-deep);
+      margin-bottom: 8px;
+    }
+
+    .data-tools-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .data-tool-btn {
+      flex: 1;
+      padding: 8px 6px;
+      background: linear-gradient(135deg, var(--rose-deep), var(--rose));
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .data-tool-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(139,34,82,0.3);
+    }
+
+    .data-tools-hint {
+      font-size: 10px;
+      color: var(--ink-soft);
+      margin-top: 6px;
+      text-align: center;
+    }
     .sparkle {
       position: absolute; width: 4px; height: 4px; background: var(--gold);
       border-radius: 50%; pointer-events: none; animation: sparkle 1.5s ease-out forwards;
@@ -2243,12 +2289,30 @@
           无论相隔多远<br>
           你永远是我最好的朋友
         </div>
-        <div style="margin-top:20px;">
+        <div style="margin-top:16px;">
           <div class="quote-box">
             <div class="quote-text">"真正的朋友，是一个灵魂住在两个身体里。"</div>
             <div class="quote-author">—— 亚里士多德</div>
           </div>
         </div>
+        
+        <!-- Data Export/Import -->
+        <div class="data-tools">
+          <div class="data-tools-title">💾 数据备份</div>
+          <div class="data-tools-btns">
+            <button class="data-tool-btn" onclick="exportData()">
+              📥 导出纪念册
+            </button>
+            <button class="data-tool-btn" onclick="document.getElementById('importFile').click()">
+              📤 导入纪念册
+            </button>
+            <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData(event)">
+          </div>
+          <div class="data-tools-hint">
+            导出保存到电脑，换设备可导入恢复
+          </div>
+        </div>
+        
         <div style="margin-top:16px; font-size:11px; color:var(--ink-soft);">
           愿你一路顺风 · 前程似锦 🌸
         </div>
@@ -3443,6 +3507,54 @@ function createFloatingSignature() {
   
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 16000);
+}
+
+// ===== Data Export/Import =====
+function exportData() {
+  const db = loadDB();
+  const dataStr = JSON.stringify(db, null, 2);
+  const blob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `纪念册_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('纪念册已导出！📥');
+  fireConfetti();
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data && (data.wishes || data.archive || data.signatures)) {
+        if (confirm('导入将覆盖当前所有数据，确定继续吗？')) {
+          saveDB(data);
+          renderWishes();
+          renderCapsules();
+          renderSongs();
+          renderArchive();
+          renderTimeScroll();
+          renderSignatures();
+          showToast('纪念册导入成功！📤');
+          fireConfetti();
+        }
+      } else {
+        showToast('文件格式不正确');
+      }
+    } catch (err) {
+      showToast('导入失败，请检查文件');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
 }
 
 // ===== Init =====
