@@ -1711,6 +1711,47 @@
       display: flex;
     }
 
+    /* ===== Floating Signatures ===== */
+    .floating-signature {
+      position: fixed;
+      pointer-events: none;
+      z-index: 55;
+      padding: 6px 12px;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(4px);
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.2);
+      animation: float-around linear forwards;
+      opacity: 0;
+    }
+
+    .floating-signature img {
+      height: 24px;
+      max-width: 60px;
+      object-fit: contain;
+    }
+
+    @keyframes float-around {
+      0% {
+        opacity: 0;
+        transform: translateY(100vh) rotate(0deg);
+      }
+      10% {
+        opacity: 0.9;
+      }
+      50% {
+        opacity: 0.8;
+        transform: translateY(50vh) rotate(10deg) translateX(30px);
+      }
+      90% {
+        opacity: 0.6;
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-10vh) rotate(-5deg) translateX(-20px);
+      }
+    }
+
     /* ===== Art Font Signature ===== */
     .signature-mode-toggle {
       display: flex;
@@ -3372,6 +3413,38 @@ function renderSignatures() {
   `).join('');
 }
 
+// ===== Floating Signatures =====
+let floatingSignatureTimer = null;
+
+function startFloatingSignatures() {
+  if (floatingSignatureTimer) return;
+  floatingSignatureTimer = setInterval(createFloatingSignature, 3000);
+}
+
+function stopFloatingSignatures() {
+  clearInterval(floatingSignatureTimer);
+  floatingSignatureTimer = null;
+}
+
+function createFloatingSignature() {
+  const db = loadDB();
+  const signatures = db.signatures || [];
+  if (!signatures.length) return;
+  
+  const signature = signatures[Math.floor(Math.random() * signatures.length)];
+  
+  const el = document.createElement('div');
+  el.className = 'floating-signature';
+  el.innerHTML = `<img src="${signature.data}" alt="${signature.name}">`;
+  
+  el.style.left = (Math.random() * 80 + 10) + 'vw';
+  el.style.animationDuration = (8 + Math.random() * 6) + 's';
+  el.style.animationDelay = (Math.random() * 2) + 's';
+  
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 16000);
+}
+
 // ===== Init =====
 renderWishes();
 renderCapsules();
@@ -3380,6 +3453,7 @@ renderArchive();
 renderTimeScroll();
 initSignature();
 createCherryBlossom();
+startFloatingSignatures();
 </script>
 </body>
 </html>
