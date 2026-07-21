@@ -728,6 +728,139 @@
       letter-spacing: 8px;
       color: var(--rose-deep);
       margin-top: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .tongyang-name:hover {
+      color: var(--gold);
+      text-shadow: 0 0 20px rgba(201,169,110,0.5);
+    }
+
+    /* ===== Particle Effects ===== */
+    .particle-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .click-particle {
+      position: absolute;
+      pointer-events: none;
+      border-radius: 50%;
+      animation: particle-fly 1s ease-out forwards;
+    }
+
+    @keyframes particle-fly {
+      0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(var(--tx), var(--ty)) scale(0);
+        opacity: 0;
+      }
+    }
+
+    /* Floating sparkles */
+    .sparkle-float {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: var(--gold);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: sparkle-drift 4s ease-in-out infinite;
+      opacity: 0.6;
+    }
+
+    @keyframes sparkle-drift {
+      0%, 100% {
+        transform: translateY(0) scale(1);
+        opacity: 0.3;
+      }
+      50% {
+        transform: translateY(-20px) scale(1.5);
+        opacity: 0.8;
+      }
+    }
+
+    /* Interactive title */
+    .interactive-title {
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+    }
+
+    .interactive-title:hover {
+      transform: scale(1.02);
+    }
+
+    .interactive-title:active {
+      transform: scale(0.98);
+    }
+
+    /* Logo click effect */
+    .tongyang-circle {
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .tongyang-circle:hover {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .tongyang-circle:active {
+      transform: scale(0.95);
+    }
+
+    /* Heart burst effect */
+    .heart-burst {
+      position: absolute;
+      font-size: 20px;
+      pointer-events: none;
+      animation: heart-rise 1.5s ease-out forwards;
+    }
+
+    @keyframes heart-rise {
+      0% {
+        transform: translateY(0) scale(0);
+        opacity: 1;
+      }
+      50% {
+        transform: translateY(-40px) scale(1.2);
+        opacity: 0.8;
+      }
+      100% {
+        transform: translateY(-80px) scale(0.8);
+        opacity: 0;
+      }
+    }
+
+    /* Ripple effect */
+    .ripple {
+      position: absolute;
+      border: 2px solid var(--rose);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: ripple-expand 0.8s ease-out forwards;
+    }
+
+    @keyframes ripple-expand {
+      0% {
+        width: 0;
+        height: 0;
+        opacity: 1;
+      }
+      100% {
+        width: 100px;
+        height: 100px;
+        opacity: 0;
+      }
     }
 
     .ceremony-hint {
@@ -802,31 +935,25 @@
     <div class="flipbook" id="flipbook">
 
       <!-- Page 1: Cover -->
-      <div class="page active" data-page="0">
-        <!-- 痛仰乐队 Logo - 简约版 -->
-        <div class="tongyang-logo">
+      <div class="page active" data-page="0" onclick="createClickParticles(event)">
+        <!-- Particle Canvas -->
+        <canvas class="particle-canvas" id="particleCanvas"></canvas>
+        
+        <!-- 痛仰乐队 Logo -->
+        <div class="tongyang-logo" onclick="event.stopPropagation(); logoClick(event)">
           <div class="tongyang-circle">
             <svg viewBox="0 0 120 120" width="90" height="90">
-              <!-- 外圈 -->
               <circle cx="60" cy="60" r="55" fill="none" stroke="#8B2252" stroke-width="2.5"/>
-              <!-- 哪吒剪影 - 简化为圆形内的图形 -->
               <circle cx="60" cy="60" r="52" fill="#8B2252"/>
-              <!-- 哪吒白色剪影 -->
               <g transform="translate(60,58)">
-                <!-- 头部 -->
                 <circle cx="0" cy="-18" r="12" fill="#FFF8F0"/>
-                <!-- 身体 -->
                 <ellipse cx="0" cy="5" rx="14" ry="18" fill="#FFF8F0"/>
-                <!-- 风火轮左 -->
                 <circle cx="-18" cy="25" r="8" fill="#C9A96E"/>
                 <circle cx="-18" cy="25" r="4" fill="#8B2252"/>
-                <!-- 风火轮右 -->
                 <circle cx="18" cy="25" r="8" fill="#C9A96E"/>
                 <circle cx="18" cy="25" r="4" fill="#8B2252"/>
-                <!-- 混天绑带 -->
                 <path d="M-12-15 Q-25-10 -20 5" stroke="#C9A96E" stroke-width="2" fill="none"/>
                 <path d="M12-15 Q25-10 20 5" stroke="#C9A96E" stroke-width="2" fill="none"/>
-                <!-- 发髻 -->
                 <circle cx="0" cy="-30" r="5" fill="#FFF8F0"/>
               </g>
             </svg>
@@ -836,7 +963,7 @@
         
         <div class="page-ornament">✦ ✦ ✦</div>
         <div class="page-eyebrow">一份来自心底的邀约</div>
-        <h1>好久不见<br>一起吃顿饭吧</h1>
+        <h1 class="interactive-title" onclick="event.stopPropagation(); titleClick()">好久不见<br>一起吃顿饭吧</h1>
         <div class="page-subtitle">那些说「改天约」的日子<br>今天就是那个「改天」</div>
         <div class="page-divider"></div>
         <div class="page-poem">
@@ -844,6 +971,9 @@
           带上你自己就够了<br>
           我们聊聊天，喝点小酒<br>
           像从前那样
+        </div>
+        <div style="margin-top:20px; font-size:12px; color:var(--ink-soft); opacity:0.6;">
+          ✨ 点击页面任意位置有惊喜 ✨
         </div>
       </div>
 
@@ -1192,7 +1322,6 @@ function openEnvelope() {
   const ceremony = document.getElementById('ceremony');
   const seal = document.getElementById('waxSeal');
   
-  // 创建火花效果
   for (let i = 0; i < 12; i++) {
     setTimeout(() => {
       const sparkle = document.createElement('div');
@@ -1206,16 +1335,157 @@ function openEnvelope() {
     }, i * 50);
   }
   
-  // 打开信封
-  setTimeout(() => {
-    envelope.classList.add('opened');
-  }, 200);
-  
-  // 隐藏仪式，显示请柬
+  setTimeout(() => { envelope.classList.add('opened'); }, 200);
   setTimeout(() => {
     ceremony.classList.add('hidden');
     fireConfetti();
+    initParticles();
   }, 1200);
+}
+
+// ===== Particle Effects =====
+let particles = [];
+let particleCanvas, particleCtx;
+
+function initParticles() {
+  particleCanvas = document.getElementById('particleCanvas');
+  if (!particleCanvas) return;
+  particleCtx = particleCanvas.getContext('2d');
+  resizeCanvas();
+  
+  // 创建浮动粒子
+  for (let i = 0; i < 15; i++) {
+    particles.push({
+      x: Math.random() * particleCanvas.width,
+      y: Math.random() * particleCanvas.height,
+      size: Math.random() * 3 + 1,
+      speedX: (Math.random() - 0.5) * 0.5,
+      speedY: (Math.random() - 0.5) * 0.5,
+      opacity: Math.random() * 0.5 + 0.2,
+      color: ['#C9A96E', '#C76B8A', '#8B2252'][Math.floor(Math.random() * 3)]
+    });
+  }
+  animateParticles();
+}
+
+function resizeCanvas() {
+  const page = document.querySelector('.page.active');
+  if (particleCanvas && page) {
+    particleCanvas.width = page.offsetWidth;
+    particleCanvas.height = page.offsetHeight;
+  }
+}
+
+function animateParticles() {
+  if (!particleCtx) return;
+  particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+  
+  particles.forEach(p => {
+    p.x += p.speedX;
+    p.y += p.speedY;
+    
+    if (p.x < 0) p.x = particleCanvas.width;
+    if (p.x > particleCanvas.width) p.x = 0;
+    if (p.y < 0) p.y = particleCanvas.height;
+    if (p.y > particleCanvas.height) p.y = 0;
+    
+    particleCtx.beginPath();
+    particleCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    particleCtx.fillStyle = p.color;
+    particleCtx.globalAlpha = p.opacity;
+    particleCtx.fill();
+  });
+  
+  requestAnimationFrame(animateParticles);
+}
+
+function createClickParticles(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  
+  // 创建点击粒子
+  for (let i = 0; i < 12; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'click-particle';
+    const angle = (Math.PI * 2 * i) / 12;
+    const distance = 30 + Math.random() * 40;
+    const tx = Math.cos(angle) * distance;
+    const ty = Math.sin(angle) * distance;
+    
+    particle.style.cssText = `
+      left: ${x}px;
+      top: ${y}px;
+      width: ${4 + Math.random() * 4}px;
+      height: ${4 + Math.random() * 4}px;
+      background: ${['#C9A96E', '#C76B8A', '#FF6B6B', '#FFD93D'][Math.floor(Math.random() * 4)]};
+      --tx: ${tx}px;
+      --ty: ${ty}px;
+    `;
+    
+    e.currentTarget.appendChild(particle);
+    setTimeout(() => particle.remove(), 1000);
+  }
+  
+  // 创建涟漪
+  const ripple = document.createElement('div');
+  ripple.className = 'ripple';
+  ripple.style.left = (x - 50) + 'px';
+  ripple.style.top = (y - 50) + 'px';
+  e.currentTarget.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 800);
+}
+
+function logoClick(e) {
+  // 创建心形爆发
+  const rect = e.currentTarget.getBoundingClientRect();
+  const page = document.querySelector('.page.active');
+  const pageRect = page.getBoundingClientRect();
+  const x = rect.left - pageRect.left + rect.width / 2;
+  const y = rect.top - pageRect.top + rect.height / 2;
+  
+  const hearts = ['❤️', '💕', '💖', '💗', '💓', '🌹', '✨', '🎵'];
+  for (let i = 0; i < 8; i++) {
+    const heart = document.createElement('div');
+    heart.className = 'heart-burst';
+    heart.textContent = hearts[i % hearts.length];
+    heart.style.left = (x + (Math.random() - 0.5) * 60) + 'px';
+    heart.style.top = y + 'px';
+    heart.style.animationDelay = (i * 0.05) + 's';
+    page.appendChild(heart);
+    setTimeout(() => heart.remove(), 1500);
+  }
+  
+  // 旋转 logo
+  const circle = document.querySelector('.tongyang-circle');
+  circle.style.transform = 'rotate(360deg) scale(1.2)';
+  setTimeout(() => { circle.style.transform = ''; }, 600);
+}
+
+let titleClickCount = 0;
+let titleClickTimer = null;
+
+function titleClick() {
+  titleClickCount++;
+  clearTimeout(titleClickTimer);
+  titleClickTimer = setTimeout(() => { titleClickCount = 0; }, 2000);
+  
+  if (titleClickCount >= 3) {
+    titleClickCount = 0;
+    fireConfetti();
+    showToast('🎉 祝你今天开心！');
+    
+    // 额外花瓣雨
+    for (let i = 0; i < 8; i++) {
+      setTimeout(() => {
+        const petal = document.createElement('div');
+        petal.style.cssText = `position:fixed; top:-20px; left:${Math.random()*100}vw; pointer-events:none; z-index:1001; font-size:${16+Math.random()*16}px; animation: fall ${4+Math.random()*2}s linear forwards;`;
+        petal.textContent = ['🌸', '💕', '✨', '🌹', '💖'][Math.floor(Math.random()*5)];
+        document.body.appendChild(petal);
+        setTimeout(() => petal.remove(), 6000);
+      }, i * 80);
+    }
+  }
 }
 
 // ===== Utils =====
