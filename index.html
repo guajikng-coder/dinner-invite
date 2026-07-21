@@ -837,6 +837,59 @@
     .music-player {
       padding-bottom: env(safe-area-inset-bottom);
     }
+
+    /* ===== Music playlist ===== */
+    .music-playlist {
+      margin-top: 12px;
+      border-top: 1px solid var(--rose-light);
+      padding-top: 12px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    .music-playlist-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-size: 13px;
+      color: var(--ink);
+    }
+    .music-playlist-item:hover {
+      background: rgba(139,34,82,0.08);
+    }
+    .music-playlist-item.active {
+      background: rgba(139,34,82,0.12);
+      color: var(--rose-deep);
+      font-weight: 600;
+    }
+    .music-playlist-item .item-num {
+      width: 20px;
+      text-align: center;
+      color: var(--ink-soft);
+      font-size: 12px;
+    }
+    .music-playlist-item.active .item-num {
+      color: var(--rose-deep);
+    }
+    .music-playlist-item .item-playing {
+      display: none;
+      width: 20px;
+      text-align: center;
+    }
+    .music-playlist-item.active.playing .item-num {
+      display: none;
+    }
+    .music-playlist-item.active.playing .item-playing {
+      display: block;
+      animation: pulse 1s ease infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
   </style>
 </head>
 <body>
@@ -878,6 +931,7 @@
         <div class="music-bar"></div>
         <div class="music-bar"></div>
       </div>
+      <div class="music-playlist" id="musicPlaylist"></div>
     </div>
     <button class="music-toggle" id="musicToggle" onclick="toggleMusicPanel()">🎵</button>
   </div>
@@ -1515,6 +1569,7 @@ function togglePlay() {
     musicToggle.classList.add('playing');
     visualizer.classList.remove('paused');
   }
+  renderPlaylist();
 }
 
 function toggleMusicPanel() {
@@ -1525,6 +1580,7 @@ function prevTrack() {
   stopMelody();
   currentMelody = (currentMelody - 1 + melodies.length) % melodies.length;
   musicInfo.textContent = melodies[currentMelody].name;
+  renderPlaylist();
   if (isPlaying) playMelody();
 }
 
@@ -1532,14 +1588,36 @@ function nextTrack() {
   stopMelody();
   currentMelody = (currentMelody + 1) % melodies.length;
   musicInfo.textContent = melodies[currentMelody].name;
+  renderPlaylist();
   if (isPlaying) playMelody();
 }
 
+function selectTrack(idx) {
+  stopMelody();
+  currentMelody = idx;
+  musicInfo.textContent = melodies[currentMelody].name;
+  renderPlaylist();
+  if (!isPlaying) togglePlay();
+  else playMelody();
+}
+
 function seekMusic(e) {
-  // Visual feedback only for generated audio
   const rect = e.target.getBoundingClientRect();
   const pct = (e.clientX - rect.left) / rect.width;
   musicProgressFill.style.width = (pct * 100) + '%';
+}
+
+function renderPlaylist() {
+  const playlist = document.getElementById('musicPlaylist');
+  playlist.innerHTML = melodies.map((m, i) => {
+    const isActive = i === currentMelody;
+    const playingClass = isActive && isPlaying ? ' playing' : '';
+    return `<div class="music-playlist-item${isActive ? ' active' : ''}${playingClass}" onclick="selectTrack(${i})">
+      <span class="item-num">${i + 1}</span>
+      <span class="item-playing">♪</span>
+      <span class="item-name">${m.name}</span>
+    </div>`;
+  }).join('');
 }
 
 // Progress animation
@@ -1552,6 +1630,7 @@ setInterval(() => {
 }, 100);
 
 musicInfo.textContent = melodies[0].name;
+renderPlaylist();
 </script>
 </body>
 </html>
