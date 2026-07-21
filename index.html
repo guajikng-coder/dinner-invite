@@ -709,25 +709,25 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-bottom: 16px;
-      animation: logo-float 3s ease-in-out infinite;
+      margin-bottom: 20px;
     }
 
-    @keyframes logo-float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-5px); }
+    .tongyang-circle {
+      position: relative;
+      animation: logo-breathe 3s ease-in-out infinite;
     }
 
-    .tongyang-logo svg {
-      filter: drop-shadow(0 4px 12px rgba(139,34,82,0.3));
+    @keyframes logo-breathe {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 4px 12px rgba(139,34,82,0.3)); }
+      50% { transform: scale(1.03); filter: drop-shadow(0 6px 20px rgba(139,34,82,0.4)); }
     }
 
-    .tongyang-text {
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 4px;
+    .tongyang-name {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 8px;
       color: var(--rose-deep);
-      margin-top: 8px;
+      margin-top: 12px;
     }
 
     .ceremony-hint {
@@ -803,40 +803,35 @@
 
       <!-- Page 1: Cover -->
       <div class="page active" data-page="0">
-        <!-- 痛仰乐队 Logo -->
+        <!-- 痛仰乐队 Logo - 简约版 -->
         <div class="tongyang-logo">
-          <svg viewBox="0 0 100 100" width="80" height="80">
-            <!-- 外圈 -->
-            <circle cx="50" cy="50" r="45" fill="none" stroke="#8B2252" stroke-width="3"/>
-            <!-- 太极分割线 -->
-            <path d="M50 5 Q50 50 50 95" stroke="#8B2252" stroke-width="2" fill="none"/>
-            <!-- 上半圆（白） -->
-            <path d="M50 5 A45 45 0 0 1 50 95 A22.5 22.5 0 0 0 50 5" fill="#FFF8F0"/>
-            <!-- 下半圆（黑） -->
-            <path d="M50 5 A45 45 0 0 0 50 95 A22.5 22.5 0 0 1 50 5" fill="#8B2252"/>
-            <!-- 上方小圆点 -->
-            <circle cx="50" cy="27" r="5" fill="#8B2252"/>
-            <!-- 下方小圆点 -->
-            <circle cx="50" cy="73" r="5" fill="#FFF8F0"/>
-            <!-- 哪吒轮廓（简化的莲花座+火焰） -->
-            <g transform="translate(50,50) scale(0.3)">
-              <!-- 火焰/莲花 -->
-              <path d="M0-60 Q15-45 10-30 Q5-15 0 0 Q-5-15 -10-30 Q-15-45 0-60" fill="#C9A96E" opacity="0.8"/>
-              <path d="M-30-40 Q-15-50 0-40 Q15-50 30-40 Q15-30 0-20 Q-15-30 -30-40" fill="#C9A96E" opacity="0.6"/>
-              <!-- 哪吒身体 -->
-              <ellipse cx="0" cy="10" rx="20" ry="25" fill="#FFF8F0" stroke="#8B2252" stroke-width="2"/>
-              <!-- 头部 -->
-              <circle cx="0" cy="-15" r="15" fill="#FFF8F0" stroke="#8B2252" stroke-width="2"/>
-              <!-- 眼睛 -->
-              <circle cx="-5" cy="-18" r="2" fill="#8B2252"/>
-              <circle cx="5" cy="-18" r="2" fill="#8B2252"/>
-              <!-- 嘴巴 -->
-              <path d="M-4-10 Q0-7 4-10" stroke="#8B2252" stroke-width="1.5" fill="none"/>
-              <!-- 乾坤圈 -->
-              <ellipse cx="0" cy="-15" rx="22" ry="22" fill="none" stroke="#C9A96E" stroke-width="2" stroke-dasharray="3,3"/>
-            </g>
-          </svg>
-          <div class="tongyang-text">痛仰乐队</div>
+          <div class="tongyang-circle">
+            <svg viewBox="0 0 120 120" width="90" height="90">
+              <!-- 外圈 -->
+              <circle cx="60" cy="60" r="55" fill="none" stroke="#8B2252" stroke-width="2.5"/>
+              <!-- 哪吒剪影 - 简化为圆形内的图形 -->
+              <circle cx="60" cy="60" r="52" fill="#8B2252"/>
+              <!-- 哪吒白色剪影 -->
+              <g transform="translate(60,58)">
+                <!-- 头部 -->
+                <circle cx="0" cy="-18" r="12" fill="#FFF8F0"/>
+                <!-- 身体 -->
+                <ellipse cx="0" cy="5" rx="14" ry="18" fill="#FFF8F0"/>
+                <!-- 风火轮左 -->
+                <circle cx="-18" cy="25" r="8" fill="#C9A96E"/>
+                <circle cx="-18" cy="25" r="4" fill="#8B2252"/>
+                <!-- 风火轮右 -->
+                <circle cx="18" cy="25" r="8" fill="#C9A96E"/>
+                <circle cx="18" cy="25" r="4" fill="#8B2252"/>
+                <!-- 混天绑带 -->
+                <path d="M-12-15 Q-25-10 -20 5" stroke="#C9A96E" stroke-width="2" fill="none"/>
+                <path d="M12-15 Q25-10 20 5" stroke="#C9A96E" stroke-width="2" fill="none"/>
+                <!-- 发髻 -->
+                <circle cx="0" cy="-30" r="5" fill="#FFF8F0"/>
+              </g>
+            </svg>
+          </div>
+          <div class="tongyang-name">痛 仰</div>
         </div>
         
         <div class="page-ornament">✦ ✦ ✦</div>
